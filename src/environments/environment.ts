@@ -1,11 +1,11 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: 'YOUR_API_KEY',
-    authDomain: 'YOUR_PROJECT.firebaseapp.com',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_PROJECT.appspot.com',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    appId: 'YOUR_APP_ID'
+  apiKey: "AIzaSyD6unP0gEs88LTzD6MC-bHEvp-fVSMBvJs",
+  authDomain: "workouttrackingcore.firebaseapp.com",
+  projectId: "workouttrackingcore",
+  storageBucket: "workouttrackingcore.firebasestorage.app",
+  messagingSenderId: "501522876413",
+  appId: "1:501522876413:web:ff578c0c72895546877b94"
   }
 };
