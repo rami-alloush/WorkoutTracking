@@ -191,7 +191,6 @@ export class DashboardComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await Promise.all([
-      this.exerciseService.seedDefaultExercises(),
       this.exerciseService.loadExercises(),
       this.workoutService.loadWorkouts(),
       this.sessionService.loadSessions()

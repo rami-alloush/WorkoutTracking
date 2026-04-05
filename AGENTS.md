@@ -1,0 +1,1 @@
+- Try to solve the problems by yourself first through code, and if you can't, then try to use the browser tools as last resort.
