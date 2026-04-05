@@ -152,6 +152,7 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
           <p-floatLabel variant="on">
             <p-select id="exMuscle" [options]="muscleGroupOptions" [(ngModel)]="newExerciseMuscle"
                       optionLabel="label" optionValue="value"
+                      appendTo="body"
                       styleClass="w-full" />
             <label for="exMuscle">Muscle Group</label>
           </p-floatLabel>
@@ -159,6 +160,7 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
           <p-floatLabel variant="on">
             <p-select id="exEquip" [options]="equipmentOptions" [(ngModel)]="newExerciseEquipment"
                       optionLabel="label" optionValue="value"
+                      appendTo="body"
                       styleClass="w-full" />
             <label for="exEquip">Equipment (optional)</label>
           </p-floatLabel>
