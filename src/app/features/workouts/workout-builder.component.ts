@@ -135,7 +135,14 @@ interface BuilderExercise {
     }
     .exercise-details {
       flex: 1;
-      strong { display: block; margin-bottom: 0.25rem; }
+      min-width: 0;
+      strong { 
+        display: block; 
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
     .sets-row {
       display: flex;
