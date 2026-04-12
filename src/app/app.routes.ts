@@ -17,6 +17,10 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'exercises', loadComponent: () => import('./features/exercises/exercise-library.component').then(m => m.ExerciseLibraryComponent) },
+      { path: 'programs', loadComponent: () => import('./features/programs/program-list.component').then(m => m.ProgramListComponent) },
+      { path: 'programs/new', loadComponent: () => import('./features/programs/program-builder.component').then(m => m.ProgramBuilderComponent) },
+      { path: 'programs/:id', loadComponent: () => import('./features/programs/program-detail.component').then(m => m.ProgramDetailComponent) },
+      { path: 'programs/:id/edit', loadComponent: () => import('./features/programs/program-builder.component').then(m => m.ProgramBuilderComponent) },
       { path: 'workouts', loadComponent: () => import('./features/workouts/workout-list.component').then(m => m.WorkoutListComponent) },
       { path: 'workouts/new', loadComponent: () => import('./features/workouts/workout-builder.component').then(m => m.WorkoutBuilderComponent) },
       { path: 'workouts/:id/edit', loadComponent: () => import('./features/workouts/workout-builder.component').then(m => m.WorkoutBuilderComponent) },

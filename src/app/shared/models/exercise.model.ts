@@ -108,4 +108,19 @@ export const DEFAULT_EXERCISES: Omit<Exercise, 'id' | 'createdAt'>[] = [
   { name: 'Kettlebell Swing', muscleGroup: 'Full Body', equipment: 'Kettlebell', isCustom: false },
   { name: 'Burpee', muscleGroup: 'Full Body', equipment: 'Bodyweight', isCustom: false },
   { name: 'Turkish Get-up', muscleGroup: 'Full Body', equipment: 'Kettlebell', isCustom: false },
+
+  // Additional exercises for program templates
+  { name: 'Machine Chest Press', muscleGroup: 'Chest', equipment: 'Machine', isCustom: false },
+  { name: 'Dumbbell Goblet Squat', muscleGroup: 'Quadriceps', equipment: 'Dumbbell', isCustom: false },
+  { name: 'Dumbbell Romanian Deadlift', muscleGroup: 'Hamstrings', equipment: 'Dumbbell', isCustom: false },
+  { name: 'Cable Leg Curl', muscleGroup: 'Hamstrings', equipment: 'Cable', isCustom: false },
+  { name: 'Standing Dumbbell Calf Raise', muscleGroup: 'Calves', equipment: 'Dumbbell', isCustom: false },
+  { name: 'Single Arm Cable Row', muscleGroup: 'Back', equipment: 'Cable', isCustom: false },
+  { name: 'Cable Chest Fly', muscleGroup: 'Chest', equipment: 'Cable', isCustom: false },
+  { name: 'Cable Lateral Raise', muscleGroup: 'Shoulders', equipment: 'Cable', isCustom: false },
+  { name: 'Overhead Cable Tricep Extension', muscleGroup: 'Triceps', equipment: 'Cable', isCustom: false },
+  { name: 'Dumbbell Step-Up', muscleGroup: 'Quadriceps', equipment: 'Dumbbell', isCustom: false },
+  { name: 'Dumbbell Hip Thrust', muscleGroup: 'Glutes', equipment: 'Dumbbell', isCustom: false },
+  { name: 'Walking Lunge', muscleGroup: 'Quadriceps', equipment: 'Dumbbell', isCustom: false },
+  { name: 'Cable Pull-Through', muscleGroup: 'Glutes', equipment: 'Cable', isCustom: false },
 ];

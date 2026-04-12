@@ -22,6 +22,9 @@ import { Button } from 'primeng/button';
             <a routerLink="/exercises" routerLinkActive="active-link">
               <i class="pi pi-list"></i><span>Exercises</span>
             </a>
+            <a routerLink="/programs" routerLinkActive="active-link">
+              <i class="pi pi-th-large"></i><span>Programs</span>
+            </a>
             <a routerLink="/workouts" routerLinkActive="active-link">
               <i class="pi pi-bookmark"></i><span>Templates</span>
             </a>
