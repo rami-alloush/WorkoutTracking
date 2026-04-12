@@ -149,7 +149,7 @@ interface PlayerExercise {
       margin-bottom: 0.75rem;
       h3 { margin: 0 0 0.25rem; }
     }
-    .sets-table { width: 100%; }
+    .sets-table { width: 100%; overflow-x: auto; }
     .sets-header {
       display: flex;
       gap: 0.5rem;
@@ -159,6 +159,7 @@ interface PlayerExercise {
       text-transform: uppercase;
       color: var(--p-text-muted-color);
       border-bottom: 1px solid var(--p-surface-border);
+      min-width: 300px;
     }
     .set-row {
       display: flex;
@@ -166,6 +167,7 @@ interface PlayerExercise {
       padding: 0.375rem 0;
       align-items: center;
       border-bottom: 1px solid var(--p-surface-50);
+      min-width: 300px;
     }
     .set-col-num { width: 40px; text-align: center; }
     .set-col { flex: 1; min-width: 0; }

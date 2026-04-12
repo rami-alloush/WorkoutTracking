@@ -129,7 +129,7 @@ import { DatePipe } from '@angular/common';
       margin-bottom: 0.75rem;
       h3 { margin: 0; }
     }
-    .sets-detail-table { width: 100%; }
+    .sets-detail-table { width: 100%; overflow-x: auto; }
     .sets-detail-header {
       display: flex;
       padding: 0.375rem 0;
@@ -138,12 +138,14 @@ import { DatePipe } from '@angular/common';
       text-transform: uppercase;
       color: var(--p-text-muted-color);
       border-bottom: 1px solid var(--p-surface-border);
+      min-width: 320px;
     }
     .sets-detail-row {
       display: flex;
       padding: 0.5rem 0;
       border-bottom: 1px solid var(--p-surface-50);
       font-size: 0.9rem;
+      min-width: 320px;
     }
     .col-set { width: 50px; font-weight: 700; color: var(--p-primary-color); }
     .col-data { flex: 1; }
