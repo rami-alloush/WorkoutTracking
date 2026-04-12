@@ -87,6 +87,10 @@ import { DatePipe } from '@angular/common';
       flex-wrap: wrap;
       h3 { margin: 0 0 0.25rem; }
     }
+    .template-info {
+      flex: 1;
+      min-width: 0;
+    }
     .template-meta {
       display: flex;
       gap: 1rem;

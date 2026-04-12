@@ -49,11 +49,11 @@ import { Button } from 'primeng/button';
       background: var(--p-surface-ground);
     }
     .layout-header {
-      background: var(--p-surface-card);
+      background: var(--p-surface-0);
       border-bottom: 1px solid var(--p-surface-border);
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1000;
     }
     .header-content {
       max-width: 1200px;

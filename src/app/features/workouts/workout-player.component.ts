@@ -168,8 +168,13 @@ interface PlayerExercise {
       border-bottom: 1px solid var(--p-surface-50);
     }
     .set-col-num { width: 40px; text-align: center; }
-    .set-col { flex: 1; }
+    .set-col { flex: 1; min-width: 0; }
     .set-col-action { width: 40px; text-align: center; }
+    .set-number {
+      font-weight: 700;
+      color: var(--p-primary-color);
+    }
+    :host ::ng-deep .p-inputnumber { width: 100%; }
     .set-number {
       font-weight: 700;
       color: var(--p-primary-color);

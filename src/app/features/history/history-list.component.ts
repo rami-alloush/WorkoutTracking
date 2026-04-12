@@ -73,6 +73,8 @@ import { DatePipe } from '@angular/common';
       align-items: center;
     }
     .session-info {
+      flex: 1;
+      min-width: 0;
       h3 { margin: 0 0 0.25rem; }
     }
     .session-meta {
