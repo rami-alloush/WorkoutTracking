@@ -2,7 +2,8 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default exercises readable by all authenticated users
+
+    // Default + custom exercises: readable by all authenticated users
     match /exercises/{exerciseId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null
@@ -13,19 +14,26 @@ service cloud.firestore {
 
     // Workouts - only owner can CRUD
     match /workouts/{workoutId} {
-      allow read, write: if request.auth != null
+      allow read, update, delete: if request.auth != null
         && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
         && request.resource.data.userId == request.auth.uid;
     }
 
-    // Sessions - only owner can read/create, no updates (locked)
+    // Programs - only owner can CRUD
+    match /programs/{programId} {
+      allow read, update, delete: if request.auth != null
+        && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Sessions - only owner can read/create, no updates or deletes (locked)
     match /sessions/{sessionId} {
       allow read: if request.auth != null
         && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null
         && request.resource.data.userId == request.auth.uid;
-      // No update or delete - sessions are locked after save
     }
   }
 }
