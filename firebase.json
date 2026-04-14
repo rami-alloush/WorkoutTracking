@@ -2,7 +2,6 @@
   "hosting": {
     "public": "dist/workout-tracker/browser",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "predeploy": ["npm run build"],
     "rewrites": [
       {
         "source": "**",
