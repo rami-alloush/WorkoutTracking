@@ -31,5 +31,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      - name: Deploy to Firebase (Hosting + Firestore Rules)
-        run: npx firebase deploy --only hosting,firestore:rules --project workouttrackingcore --non-interactive
+      - name: Deploy Firebase Hosting
+        run: npx firebase deploy --only hosting --project workouttrackingcore --non-interactive
+
+      - name: Deploy Firestore Rules (only if changed)
+        if: contains(github.event.commits[0].modified, 'firestore.rules') || contains(github.event.commits[0].added, 'firestore.rules')
+        run: npx firebase deploy --only firestore:rules --project workouttrackingcore --non-interactive
