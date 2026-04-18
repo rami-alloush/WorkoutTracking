@@ -404,8 +404,9 @@ export class WorkoutPlayerComponent implements OnInit {
             sets.push({ weight: last.weight, reps: last.reps });
           }
         } else {
+          const defaultReps = we.targetReps ?? 0;
           for (let i = 0; i < we.targetSets; i++) {
-            sets.push({ weight: 0, reps: 0 });
+            sets.push({ weight: 0, reps: defaultReps });
           }
         }
 

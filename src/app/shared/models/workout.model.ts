@@ -2,6 +2,7 @@ export interface WorkoutExercise {
   exerciseId: string;
   order: number;
   targetSets: number;
+  targetReps?: number;
 }
 
 export interface Workout {

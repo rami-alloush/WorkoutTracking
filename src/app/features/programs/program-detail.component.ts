@@ -301,6 +301,7 @@ export class ProgramDetailComponent implements OnInit {
         exerciseId: e.exerciseId,
         order: i + 1,
         targetSets: e.sets,
+        targetReps: e.repsMin,
       }));
       const workoutId = await this.workoutService.createWorkout(day.name, exercises);
       this.router.navigate(['/workouts', workoutId, 'play']);
