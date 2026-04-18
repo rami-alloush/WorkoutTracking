@@ -8,14 +8,17 @@ import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { WorkoutSession } from '../../shared/models/session.model';
 import { DatePipe } from '@angular/common';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-session-detail',
   standalone: true,
-  imports: [Button, Card, Tag, DatePipe],
+  imports: [Button, Card, Tag, DatePipe, LoadingComponent],
   template: `
     <div class="session-detail">
-      @if (!session()) {
+      @if (loading()) {
+        <app-loading label="Loading session..." />
+      } @else if (!session()) {
         <p-card>
           <div class="empty-state">
             <i class="pi pi-exclamation-triangle"></i>
@@ -29,7 +32,9 @@ import { DatePipe } from '@angular/common';
           <div>
             <h2>{{ workoutName() }}</h2>
             <div class="session-meta">
-              <span><i class="pi pi-calendar"></i> {{ session()!.startTime | date:'medium' }}</span>
+              <span
+                ><i class="pi pi-calendar"></i> {{ session()!.startTime | date: 'medium' }}</span
+              >
               <span><i class="pi pi-clock"></i> {{ duration() }}</span>
             </div>
           </div>
@@ -85,78 +90,101 @@ import { DatePipe } from '@angular/common';
       }
     </div>
   `,
-  styles: [`
-    .page-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
-      h2 { margin: 0; }
-    }
-    .session-meta {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.8rem;
-      color: var(--p-text-muted-color);
-      i { margin-right: 0.25rem; }
-    }
-    .summary-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-    }
-    .summary-item { text-align: center; }
-    .summary-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--p-primary-color);
-    }
-    .summary-label {
-      font-size: 0.75rem;
-      color: var(--p-text-muted-color);
-      text-transform: uppercase;
-    }
-    .exercise-details {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .exercise-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      h3 { margin: 0; }
-    }
-    .sets-detail-table { width: 100%; overflow-x: auto; }
-    .sets-detail-header {
-      display: flex;
-      padding: 0.375rem 0;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: var(--p-text-muted-color);
-      border-bottom: 1px solid var(--p-surface-border);
-      min-width: 320px;
-    }
-    .sets-detail-row {
-      display: flex;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--p-surface-50);
-      font-size: 0.9rem;
-      min-width: 320px;
-    }
-    .col-set { width: 50px; font-weight: 700; color: var(--p-primary-color); }
-    .col-data { flex: 1; }
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: var(--p-text-muted-color);
-      i { font-size: 2.5rem; }
-      p { margin: 0.5rem 0 1rem; }
-    }
-  `]
+  styles: [
+    `
+      .page-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+        h2 {
+          margin: 0;
+        }
+      }
+      .session-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--p-text-muted-color);
+        i {
+          margin-right: 0.25rem;
+        }
+      }
+      .summary-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+      .summary-item {
+        text-align: center;
+      }
+      .summary-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--p-primary-color);
+      }
+      .summary-label {
+        font-size: 0.75rem;
+        color: var(--p-text-muted-color);
+        text-transform: uppercase;
+      }
+      .exercise-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .exercise-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        h3 {
+          margin: 0;
+        }
+      }
+      .sets-detail-table {
+        width: 100%;
+        overflow-x: auto;
+      }
+      .sets-detail-header {
+        display: flex;
+        padding: 0.375rem 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--p-text-muted-color);
+        border-bottom: 1px solid var(--p-surface-border);
+        min-width: 320px;
+      }
+      .sets-detail-row {
+        display: flex;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--p-surface-50);
+        font-size: 0.9rem;
+        min-width: 320px;
+      }
+      .col-set {
+        width: 50px;
+        font-weight: 700;
+        color: var(--p-primary-color);
+      }
+      .col-data {
+        flex: 1;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--p-text-muted-color);
+        i {
+          font-size: 2.5rem;
+        }
+        p {
+          margin: 0.5rem 0 1rem;
+        }
+      }
+    `,
+  ],
 })
 export class SessionDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -170,38 +198,39 @@ export class SessionDetailComponent implements OnInit {
   duration = signal('—');
   totalSets = signal(0);
   totalVolume = signal('0');
+  loading = signal(true);
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([
-      this.exerciseService.loadExercises(),
-      this.workoutService.loadWorkouts()
-    ]);
+    try {
+      await Promise.all([this.exerciseService.loadExercises(), this.workoutService.loadWorkouts()]);
 
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return;
+      const id = this.route.snapshot.paramMap.get('id');
+      if (!id) return;
 
-    const session = await this.sessionService.getSessionById(id);
-    if (!session) return;
+      const session = await this.sessionService.getSessionById(id);
+      if (!session) return;
 
-    this.session.set(session);
-    this.workoutName.set(
-      this.workoutService.getWorkoutById(session.workoutId)?.name ?? 'Workout'
-    );
-
-    if (session.endTime) {
-      const diff = Math.floor(
-        (session.endTime.getTime() - session.startTime.getTime()) / 1000
+      this.session.set(session);
+      this.workoutName.set(
+        this.workoutService.getWorkoutById(session.workoutId)?.name ?? 'Workout',
       );
-      this.duration.set(`${Math.floor(diff / 60)} min`);
+
+      if (session.endTime) {
+        const diff = Math.floor((session.endTime.getTime() - session.startTime.getTime()) / 1000);
+        this.duration.set(`${Math.floor(diff / 60)} min`);
+      }
+
+      const sets = session.exercises.reduce((s, e) => s + e.sets.length, 0);
+      this.totalSets.set(sets);
+
+      const vol = session.exercises.reduce(
+        (s, e) => s + e.sets.reduce((ss, set) => ss + set.weight * set.reps, 0),
+        0,
+      );
+      this.totalVolume.set(vol.toLocaleString());
+    } finally {
+      this.loading.set(false);
     }
-
-    const sets = session.exercises.reduce((s, e) => s + e.sets.length, 0);
-    this.totalSets.set(sets);
-
-    const vol = session.exercises.reduce(
-      (s, e) => s + e.sets.reduce((ss, set) => ss + set.weight * set.reps, 0), 0
-    );
-    this.totalVolume.set(vol.toLocaleString());
   }
 
   getExerciseName(exerciseId: string): string {

@@ -14,6 +14,7 @@ import { ProgramService } from '../../core/services/program.service';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { Exercise } from '../../shared/models/exercise.model';
 import { ProgramDay, ProgramExercise } from '../../shared/models/program.model';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
 
 interface BuilderDay {
   name: string;
@@ -33,8 +34,20 @@ interface BuilderExercise {
   selector: 'app-program-builder',
   standalone: true,
   imports: [
-    FormsModule, Button, Card, InputText, InputNumber, Textarea, Select,
-    FloatLabel, Message, Accordion, AccordionContent, AccordionHeader, AccordionPanel
+    FormsModule,
+    Button,
+    Card,
+    InputText,
+    InputNumber,
+    Textarea,
+    Select,
+    FloatLabel,
+    Message,
+    Accordion,
+    AccordionContent,
+    AccordionHeader,
+    AccordionPanel,
+    LoadingComponent,
   ],
   template: `
     <div class="program-builder">
@@ -42,255 +55,336 @@ interface BuilderExercise {
         <h2>{{ isEdit() ? 'Edit Program' : 'New Program' }}</h2>
       </div>
 
-      @if (error()) {
-        <p-message severity="error" [text]="error()" styleClass="mb-3 w-full" />
-      }
+      @if (loading()) {
+        <app-loading label="Loading..." />
+      } @else {
+        @if (error()) {
+          <p-message severity="error" [text]="error()" styleClass="mb-3 w-full" />
+        }
 
-      <p-card styleClass="meta-card">
-        <div class="form-grid">
-          <p-floatlabel variant="on" class="full-width">
-            <input pInputText id="progName" [(ngModel)]="programName" class="w-full" />
-            <label for="progName">Program Name</label>
-          </p-floatlabel>
-          <p-floatlabel variant="on" class="full-width">
-            <textarea pTextarea id="progDesc" [(ngModel)]="programDesc" class="w-full"
-                      [rows]="2" [autoResize]="true"></textarea>
-            <label for="progDesc">Description (optional)</label>
-          </p-floatlabel>
-          <div class="meta-row">
-            <p-floatlabel variant="on">
-              <input pInputText id="progGoal" [(ngModel)]="programGoal" />
-              <label for="progGoal">Goal</label>
+        <p-card styleClass="meta-card">
+          <div class="form-grid">
+            <p-floatlabel variant="on" class="full-width">
+              <input pInputText id="progName" [(ngModel)]="programName" class="w-full" />
+              <label for="progName">Program Name</label>
             </p-floatlabel>
-            <p-floatlabel variant="on">
-              <input pInputText id="progSession" [(ngModel)]="programSession" />
-              <label for="progSession">Session Length</label>
+            <p-floatlabel variant="on" class="full-width">
+              <textarea
+                pTextarea
+                id="progDesc"
+                [(ngModel)]="programDesc"
+                class="w-full"
+                [rows]="2"
+                [autoResize]="true"
+              ></textarea>
+              <label for="progDesc">Description (optional)</label>
             </p-floatlabel>
-            <p-floatlabel variant="on">
-              <input pInputText id="progProg" [(ngModel)]="programProgression" />
-              <label for="progProg">Progression</label>
-            </p-floatlabel>
-          </div>
-        </div>
-      </p-card>
-
-      <div class="days-header">
-        <h3>Days</h3>
-        <p-button icon="pi pi-plus" label="Add Day" [outlined]="true" (onClick)="addDay()" />
-      </div>
-
-      @if (days().length === 0) {
-        <p-card>
-          <div class="empty-days">
-            <p>No days added. Click "Add Day" to start building your program.</p>
+            <div class="meta-row">
+              <p-floatlabel variant="on">
+                <input pInputText id="progGoal" [(ngModel)]="programGoal" />
+                <label for="progGoal">Goal</label>
+              </p-floatlabel>
+              <p-floatlabel variant="on">
+                <input pInputText id="progSession" [(ngModel)]="programSession" />
+                <label for="progSession">Session Length</label>
+              </p-floatlabel>
+              <p-floatlabel variant="on">
+                <input pInputText id="progProg" [(ngModel)]="programProgression" />
+                <label for="progProg">Progression</label>
+              </p-floatlabel>
+            </div>
           </div>
         </p-card>
-      } @else {
-        <p-accordion [multiple]="true" [value]="allDayValues()">
-          @for (day of days(); track $index; let di = $index) {
-            <p-accordionpanel [value]="'day-' + di">
-              <p-accordionheader>
-                <span class="day-header-content">
-                  <strong>{{ day.name || 'Day ' + (di + 1) }}</strong>
-                  <span class="day-ex-count">{{ day.exercises.length }} exercises</span>
-                </span>
-              </p-accordionheader>
-              <p-accordioncontent>
-                <div class="day-form">
-                  <div class="day-name-row">
-                    <p-floatlabel variant="on" class="flex-1">
-                      <input pInputText [id]="'dayName' + di" [(ngModel)]="day.name" class="w-full" />
-                      <label [for]="'dayName' + di">Day Name</label>
-                    </p-floatlabel>
-                    <p-button icon="pi pi-trash" severity="danger" [outlined]="true"
-                              (onClick)="removeDay(di)" pTooltip="Remove Day" />
-                  </div>
 
-                  <div class="add-exercise-row">
-                    <p-select [options]="exerciseOptions()" [(ngModel)]="selectedExerciseIds[di]"
-                              optionLabel="name" optionValue="id"
-                              placeholder="Select exercise" styleClass="flex-1"
-                              [filter]="true" filterBy="name" />
-                    <p-button icon="pi pi-plus" label="Add" (onClick)="addExerciseToDay(di)"
-                              [disabled]="!selectedExerciseIds[di]" />
-                  </div>
+        <div class="days-header">
+          <h3>Days</h3>
+          <p-button icon="pi pi-plus" label="Add Day" [outlined]="true" (onClick)="addDay()" />
+        </div>
 
-                  @if (day.exercises.length > 0) {
-                    <div class="exercise-list">
-                      @for (ex of day.exercises; track ex.exerciseId; let ei = $index) {
-                        <div class="exercise-row">
-                          <div class="exercise-order-col">
-                            <p-button icon="pi pi-chevron-up" [text]="true" [rounded]="true"
-                                      size="small" (onClick)="moveExUp(di, ei)" [disabled]="ei === 0" />
-                            <span class="order-num">{{ ei + 1 }}</span>
-                            <p-button icon="pi pi-chevron-down" [text]="true" [rounded]="true"
-                                      size="small" (onClick)="moveExDown(di, ei)"
-                                      [disabled]="ei === day.exercises.length - 1" />
-                          </div>
-                          <div class="exercise-fields">
-                            <strong>{{ ex.exerciseName }}</strong>
-                            <div class="fields-row">
-                              <div class="field-group">
-                                <label>Sets</label>
-                                <p-inputNumber [(ngModel)]="ex.sets" [min]="1" [max]="20"
-                                               [showButtons]="true" />
-                              </div>
-                              <div class="field-group">
-                                <label>Reps Min</label>
-                                <p-inputNumber [(ngModel)]="ex.repsMin" [min]="1" [max]="100"
-                                               [showButtons]="true" />
-                              </div>
-                              <div class="field-group">
-                                <label>Reps Max</label>
-                                <p-inputNumber [(ngModel)]="ex.repsMax" [min]="1" [max]="100"
-                                               [showButtons]="true" />
-                              </div>
-                              <p-floatlabel variant="on" class="notes-field">
-                                <input pInputText [id]="'notes' + di + '_' + ei" [(ngModel)]="ex.notes" />
-                                <label [for]="'notes' + di + '_' + ei">Notes</label>
-                              </p-floatlabel>
-                            </div>
-                          </div>
-                          <p-button icon="pi pi-trash" severity="danger" [text]="true"
-                                    (onClick)="removeExercise(di, ei)" />
-                        </div>
-                      }
+        @if (days().length === 0) {
+          <p-card>
+            <div class="empty-days">
+              <p>No days added. Click "Add Day" to start building your program.</p>
+            </div>
+          </p-card>
+        } @else {
+          <p-accordion [multiple]="true" [value]="allDayValues()">
+            @for (day of days(); track $index; let di = $index) {
+              <p-accordionpanel [value]="'day-' + di">
+                <p-accordionheader>
+                  <span class="day-header-content">
+                    <strong>{{ day.name || 'Day ' + (di + 1) }}</strong>
+                    <span class="day-ex-count">{{ day.exercises.length }} exercises</span>
+                  </span>
+                </p-accordionheader>
+                <p-accordioncontent>
+                  <div class="day-form">
+                    <div class="day-name-row">
+                      <p-floatlabel variant="on" class="flex-1">
+                        <input
+                          pInputText
+                          [id]="'dayName' + di"
+                          [(ngModel)]="day.name"
+                          class="w-full"
+                        />
+                        <label [for]="'dayName' + di">Day Name</label>
+                      </p-floatlabel>
+                      <p-button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        [outlined]="true"
+                        (onClick)="removeDay(di)"
+                        pTooltip="Remove Day"
+                      />
                     </div>
-                  }
-                </div>
-              </p-accordioncontent>
-            </p-accordionpanel>
-          }
-        </p-accordion>
-      }
 
-      <div class="form-actions">
-        <p-button label="Cancel" [text]="true" (onClick)="cancel()" />
-        <p-button [label]="isEdit() ? 'Update' : 'Create'" icon="pi pi-check"
-                  (onClick)="save()" [loading]="saving()" />
-      </div>
+                    <div class="add-exercise-row">
+                      <p-select
+                        [options]="exerciseOptions()"
+                        [(ngModel)]="selectedExerciseIds[di]"
+                        optionLabel="name"
+                        optionValue="id"
+                        placeholder="Select exercise"
+                        styleClass="flex-1"
+                        [filter]="true"
+                        filterBy="name"
+                      />
+                      <p-button
+                        icon="pi pi-plus"
+                        label="Add"
+                        (onClick)="addExerciseToDay(di)"
+                        [disabled]="!selectedExerciseIds[di]"
+                      />
+                    </div>
+
+                    @if (day.exercises.length > 0) {
+                      <div class="exercise-list">
+                        @for (ex of day.exercises; track ex.exerciseId; let ei = $index) {
+                          <div class="exercise-row">
+                            <div class="exercise-order-col">
+                              <p-button
+                                icon="pi pi-chevron-up"
+                                [text]="true"
+                                [rounded]="true"
+                                size="small"
+                                (onClick)="moveExUp(di, ei)"
+                                [disabled]="ei === 0"
+                              />
+                              <span class="order-num">{{ ei + 1 }}</span>
+                              <p-button
+                                icon="pi pi-chevron-down"
+                                [text]="true"
+                                [rounded]="true"
+                                size="small"
+                                (onClick)="moveExDown(di, ei)"
+                                [disabled]="ei === day.exercises.length - 1"
+                              />
+                            </div>
+                            <div class="exercise-fields">
+                              <strong>{{ ex.exerciseName }}</strong>
+                              <div class="fields-row">
+                                <div class="field-group">
+                                  <label>Sets</label>
+                                  <p-inputNumber
+                                    [(ngModel)]="ex.sets"
+                                    [min]="1"
+                                    [max]="20"
+                                    [showButtons]="true"
+                                  />
+                                </div>
+                                <div class="field-group">
+                                  <label>Reps Min</label>
+                                  <p-inputNumber
+                                    [(ngModel)]="ex.repsMin"
+                                    [min]="1"
+                                    [max]="100"
+                                    [showButtons]="true"
+                                  />
+                                </div>
+                                <div class="field-group">
+                                  <label>Reps Max</label>
+                                  <p-inputNumber
+                                    [(ngModel)]="ex.repsMax"
+                                    [min]="1"
+                                    [max]="100"
+                                    [showButtons]="true"
+                                  />
+                                </div>
+                                <p-floatlabel variant="on" class="notes-field">
+                                  <input
+                                    pInputText
+                                    [id]="'notes' + di + '_' + ei"
+                                    [(ngModel)]="ex.notes"
+                                  />
+                                  <label [for]="'notes' + di + '_' + ei">Notes</label>
+                                </p-floatlabel>
+                              </div>
+                            </div>
+                            <p-button
+                              icon="pi pi-trash"
+                              severity="danger"
+                              [text]="true"
+                              (onClick)="removeExercise(di, ei)"
+                            />
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </p-accordioncontent>
+              </p-accordionpanel>
+            }
+          </p-accordion>
+        }
+
+        <div class="form-actions">
+          <p-button label="Cancel" [text]="true" (onClick)="cancel()" />
+          <p-button
+            [label]="isEdit() ? 'Update' : 'Create'"
+            icon="pi pi-check"
+            (onClick)="save()"
+            [loading]="saving()"
+          />
+        </div>
+      }
     </div>
   `,
-  styles: [`
-    .page-header {
-      margin-bottom: 1rem;
-      h2 { margin: 0; }
-    }
-    :host ::ng-deep .meta-card {
-      margin-bottom: 1rem;
-    }
-    .form-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-    .full-width { width: 100%; }
-    .meta-row {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .meta-row > * { flex: 1; min-width: 150px; }
-    .days-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      h3 { margin: 0; }
-    }
-    .day-header-content {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      width: 100%;
-    }
-    .day-ex-count {
-      font-size: 0.8rem;
-      color: var(--p-text-muted-color);
-      font-weight: 400;
-    }
-    .day-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .day-name-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-    .flex-1 { flex: 1; }
-    .add-exercise-row {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-    .exercise-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .exercise-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.75rem;
-      background: var(--p-surface-50);
-      border-radius: var(--p-border-radius);
-      border: 1px solid var(--p-surface-200);
-    }
-    .exercise-order-col {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-    }
-    .order-num {
-      font-weight: 700;
-      font-size: 0.875rem;
-      color: var(--p-text-muted-color);
-    }
-    .exercise-fields {
-      flex: 1;
-      min-width: 0;
-      strong {
-        display: block;
-        margin-bottom: 0.375rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+  styles: [
+    `
+      .page-header {
+        margin-bottom: 1rem;
+        h2 {
+          margin: 0;
+        }
       }
-    }
-    .fields-row {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      align-items: flex-end;
-    }
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.125rem;
-      label {
-        font-size: 0.75rem;
+      :host ::ng-deep .meta-card {
+        margin-bottom: 1rem;
+      }
+      .form-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+      .full-width {
+        width: 100%;
+      }
+      .meta-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .meta-row > * {
+        flex: 1;
+        min-width: 150px;
+      }
+      .days-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        h3 {
+          margin: 0;
+        }
+      }
+      .day-header-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+      .day-ex-count {
+        font-size: 0.8rem;
+        color: var(--p-text-muted-color);
+        font-weight: 400;
+      }
+      .day-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .day-name-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .flex-1 {
+        flex: 1;
+      }
+      .add-exercise-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .exercise-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .exercise-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--p-surface-50);
+        border-radius: var(--p-border-radius);
+        border: 1px solid var(--p-surface-200);
+      }
+      .exercise-order-col {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+      }
+      .order-num {
+        font-weight: 700;
+        font-size: 0.875rem;
         color: var(--p-text-muted-color);
       }
-    }
-    .notes-field { flex: 1; min-width: 120px; }
-    .empty-days {
-      text-align: center;
-      padding: 2rem;
-      color: var(--p-text-muted-color);
-    }
-    .form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      padding-top: 1rem;
-      margin-top: 1rem;
-      border-top: 1px solid var(--p-surface-border);
-    }
-  `]
+      .exercise-fields {
+        flex: 1;
+        min-width: 0;
+        strong {
+          display: block;
+          margin-bottom: 0.375rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+      .fields-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+      }
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        label {
+          font-size: 0.75rem;
+          color: var(--p-text-muted-color);
+        }
+      }
+      .notes-field {
+        flex: 1;
+        min-width: 120px;
+      }
+      .empty-days {
+        text-align: center;
+        padding: 2rem;
+        color: var(--p-text-muted-color);
+      }
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        border-top: 1px solid var(--p-surface-border);
+      }
+    `,
+  ],
 })
 export class ProgramBuilderComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -310,12 +404,18 @@ export class ProgramBuilderComponent implements OnInit {
   selectedExerciseIds: string[] = [];
   error = signal('');
   saving = signal(false);
+  loading = signal(true);
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([
-      this.exerciseService.loadExercises(),
-      this.programService.loadPrograms()
-    ]);
+    try {
+      await this.loadData();
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  private async loadData(): Promise<void> {
+    await Promise.all([this.exerciseService.loadExercises(), this.programService.loadPrograms()]);
     this.exerciseOptions.set(this.exerciseService.exercises());
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -330,17 +430,17 @@ export class ProgramBuilderComponent implements OnInit {
         this.programSession = program.sessionLength ?? '';
         this.programProgression = program.progression ?? '';
         this.days.set(
-          program.days.map(d => ({
+          program.days.map((d) => ({
             name: d.name,
-            exercises: d.exercises.map(e => ({
+            exercises: d.exercises.map((e) => ({
               exerciseId: e.exerciseId,
               exerciseName: this.exerciseService.getExerciseById(e.exerciseId)?.name ?? 'Unknown',
               sets: e.sets,
               repsMin: e.repsMin,
               repsMax: e.repsMax,
-              notes: e.notes ?? ''
-            }))
-          }))
+              notes: e.notes ?? '',
+            })),
+          })),
         );
         this.selectedExerciseIds = program.days.map(() => '');
       }
@@ -374,7 +474,7 @@ export class ProgramBuilderComponent implements OnInit {
     const current = [...this.days()];
     const day = { ...current[dayIndex], exercises: [...current[dayIndex].exercises] };
 
-    if (day.exercises.some(e => e.exerciseId === exercise.id)) return;
+    if (day.exercises.some((e) => e.exerciseId === exercise.id)) return;
 
     day.exercises.push({
       exerciseId: exercise.id,
@@ -382,7 +482,7 @@ export class ProgramBuilderComponent implements OnInit {
       sets: 3,
       repsMin: 8,
       repsMax: 12,
-      notes: ''
+      notes: '',
     });
     current[dayIndex] = day;
     this.days.set(current);
@@ -424,7 +524,7 @@ export class ProgramBuilderComponent implements OnInit {
       this.error.set('Please add at least one day');
       return;
     }
-    const emptyDay = this.days().find(d => d.exercises.length === 0);
+    const emptyDay = this.days().find((d) => d.exercises.length === 0);
     if (emptyDay) {
       this.error.set(`"${emptyDay.name || 'Unnamed day'}" has no exercises`);
       return;
@@ -433,18 +533,18 @@ export class ProgramBuilderComponent implements OnInit {
     this.saving.set(true);
     this.error.set('');
     try {
-      const days: ProgramDay[] = this.days().map(d => ({
+      const days: ProgramDay[] = this.days().map((d) => ({
         name: d.name,
-        exercises: d.exercises.map(e => {
+        exercises: d.exercises.map((e) => {
           const pe: ProgramExercise = {
             exerciseId: e.exerciseId,
             sets: e.sets,
             repsMin: e.repsMin,
-            repsMax: e.repsMax
+            repsMax: e.repsMax,
           };
           if (e.notes) pe.notes = e.notes;
           return pe;
-        })
+        }),
       }));
 
       const options = {
@@ -452,11 +552,16 @@ export class ProgramBuilderComponent implements OnInit {
         daysPerWeek: days.length,
         goal: this.programGoal.trim(),
         sessionLength: this.programSession.trim(),
-        progression: this.programProgression.trim()
+        progression: this.programProgression.trim(),
       };
 
       if (this.isEdit()) {
-        await this.programService.updateProgram(this.editId, this.programName.trim(), days, options);
+        await this.programService.updateProgram(
+          this.editId,
+          this.programName.trim(),
+          days,
+          options,
+        );
       } else {
         await this.programService.createProgram(this.programName.trim(), days, options);
       }

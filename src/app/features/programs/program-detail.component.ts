@@ -9,22 +9,44 @@ import { ExerciseService } from '../../core/services/exercise.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { Program, ProgramDay } from '../../shared/models/program.model';
 import { WorkoutExercise } from '../../shared/models/workout.model';
+import { LoadingComponent } from '../../shared/components/loading/loading.component';
 
 @Component({
   selector: 'app-program-detail',
   standalone: true,
-  imports: [RouterLink, Button, Card, Tag, Accordion, AccordionContent, AccordionHeader, AccordionPanel],
+  imports: [
+    RouterLink,
+    Button,
+    Card,
+    Tag,
+    Accordion,
+    AccordionContent,
+    AccordionHeader,
+    AccordionPanel,
+    LoadingComponent,
+  ],
   template: `
     <div class="program-detail">
-      @if (program()) {
+      @if (loading()) {
+        <app-loading label="Loading program..." />
+      } @else if (program()) {
         <div class="page-header">
           <div>
-            <p-button icon="pi pi-arrow-left" [text]="true" label="Programs" routerLink="/programs" />
+            <p-button
+              icon="pi pi-arrow-left"
+              [text]="true"
+              label="Programs"
+              routerLink="/programs"
+            />
             <h2>{{ program()!.name }}</h2>
           </div>
           <div class="header-actions">
-            <p-button icon="pi pi-pencil" label="Edit" [outlined]="true"
-                      [routerLink]="['/programs', program()!.id, 'edit']" />
+            <p-button
+              icon="pi pi-pencil"
+              label="Edit"
+              [outlined]="true"
+              [routerLink]="['/programs', program()!.id, 'edit']"
+            />
           </div>
         </div>
 
@@ -40,7 +62,11 @@ import { WorkoutExercise } from '../../shared/models/workout.model';
             <p-tag [value]="program()!.sessionLength!" severity="info" icon="pi pi-clock" />
           }
           @if (program()!.daysPerWeek) {
-            <p-tag [value]="program()!.daysPerWeek + ' days/week'" severity="secondary" icon="pi pi-calendar" />
+            <p-tag
+              [value]="program()!.daysPerWeek + ' days/week'"
+              severity="secondary"
+              icon="pi pi-calendar"
+            />
           }
         </div>
 
@@ -85,8 +111,12 @@ import { WorkoutExercise } from '../../shared/models/workout.model';
                   }
                 </div>
                 <div class="day-actions">
-                  <p-button label="Start This Day" icon="pi pi-play"
-                            (onClick)="startDay(day)" [loading]="starting()" />
+                  <p-button
+                    label="Start This Day"
+                    icon="pi pi-play"
+                    (onClick)="startDay(day)"
+                    [loading]="starting()"
+                  />
                 </div>
               </p-accordioncontent>
             </p-accordionpanel>
@@ -102,115 +132,128 @@ import { WorkoutExercise } from '../../shared/models/workout.model';
       }
     </div>
   `,
-  styles: [`
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      h2 { margin: 0.25rem 0 0; }
-    }
-    .header-actions {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-    .program-desc {
-      color: var(--p-text-muted-color);
-      font-size: 0.9rem;
-      margin: 0 0 0.75rem;
-    }
-    .program-meta-bar {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-    }
-    :host ::ng-deep .progression-card {
-      margin-bottom: 1rem;
-    }
-    .progression {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      i {
-        font-size: 1.25rem;
-        color: var(--p-primary-color);
-        margin-top: 0.125rem;
+  styles: [
+    `
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        h2 {
+          margin: 0.25rem 0 0;
+        }
       }
-      strong { display: block; margin-bottom: 0.125rem; }
-      p {
-        margin: 0;
+      .header-actions {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .program-desc {
+        color: var(--p-text-muted-color);
+        font-size: 0.9rem;
+        margin: 0 0 0.75rem;
+      }
+      .program-meta-bar {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+      :host ::ng-deep .progression-card {
+        margin-bottom: 1rem;
+      }
+      .progression {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        i {
+          font-size: 1.25rem;
+          color: var(--p-primary-color);
+          margin-top: 0.125rem;
+        }
+        strong {
+          display: block;
+          margin-bottom: 0.125rem;
+        }
+        p {
+          margin: 0;
+          font-size: 0.875rem;
+          color: var(--p-text-muted-color);
+        }
+      }
+      .day-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+      .exercise-count {
+        font-size: 0.8rem;
+        color: var(--p-text-muted-color);
+        font-weight: 400;
+      }
+      .exercise-table {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .exercise-table-header,
+      .exercise-table-row {
+        display: grid;
+        grid-template-columns: 2rem 1fr 3.5rem 4rem 1fr;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        align-items: center;
+      }
+      .exercise-table-header {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--p-text-muted-color);
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--p-surface-200);
+      }
+      .exercise-table-row {
         font-size: 0.875rem;
+        border-bottom: 1px solid var(--p-surface-100);
+      }
+      .exercise-table-row:last-child {
+        border-bottom: none;
+      }
+      .col-num {
+        font-weight: 600;
         color: var(--p-text-muted-color);
       }
-    }
-    .day-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      width: 100%;
-    }
-    .exercise-count {
-      font-size: 0.8rem;
-      color: var(--p-text-muted-color);
-      font-weight: 400;
-    }
-    .exercise-table {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .exercise-table-header, .exercise-table-row {
-      display: grid;
-      grid-template-columns: 2rem 1fr 3.5rem 4rem 1fr;
-      gap: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      align-items: center;
-    }
-    .exercise-table-header {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--p-text-muted-color);
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--p-surface-200);
-    }
-    .exercise-table-row {
-      font-size: 0.875rem;
-      border-bottom: 1px solid var(--p-surface-100);
-    }
-    .exercise-table-row:last-child {
-      border-bottom: none;
-    }
-    .col-num {
-      font-weight: 600;
-      color: var(--p-text-muted-color);
-    }
-    .col-notes {
-      font-size: 0.8rem;
-      color: var(--p-text-muted-color);
-      font-style: italic;
-    }
-    .day-actions {
-      padding: 0.75rem 0 0;
-      display: flex;
-      gap: 0.5rem;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: var(--p-text-muted-color);
-    }
-    @media (max-width: 600px) {
-      .exercise-table-header, .exercise-table-row {
-        grid-template-columns: 1.5rem 1fr 2.5rem 3rem;
+      .col-notes {
+        font-size: 0.8rem;
+        color: var(--p-text-muted-color);
+        font-style: italic;
       }
-      .col-notes { display: none; }
-      .exercise-table-header .col-notes { display: none; }
-    }
-  `]
+      .day-actions {
+        padding: 0.75rem 0 0;
+        display: flex;
+        gap: 0.5rem;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--p-text-muted-color);
+      }
+      @media (max-width: 600px) {
+        .exercise-table-header,
+        .exercise-table-row {
+          grid-template-columns: 1.5rem 1fr 2.5rem 3rem;
+        }
+        .col-notes {
+          display: none;
+        }
+        .exercise-table-header .col-notes {
+          display: none;
+        }
+      }
+    `,
+  ],
 })
 export class ProgramDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -221,17 +264,19 @@ export class ProgramDetailComponent implements OnInit {
 
   program = signal<Program | null>(null);
   starting = signal(false);
+  loading = signal(true);
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([
-      this.exerciseService.loadExercises(),
-      this.programService.loadPrograms()
-    ]);
+    try {
+      await Promise.all([this.exerciseService.loadExercises(), this.programService.loadPrograms()]);
 
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      const p = this.programService.getProgramById(id);
-      this.program.set(p ?? null);
+      const id = this.route.snapshot.paramMap.get('id');
+      if (id) {
+        const p = this.programService.getProgramById(id);
+        this.program.set(p ?? null);
+      }
+    } finally {
+      this.loading.set(false);
     }
   }
 
@@ -255,7 +300,7 @@ export class ProgramDetailComponent implements OnInit {
       const exercises: WorkoutExercise[] = day.exercises.map((e, i) => ({
         exerciseId: e.exerciseId,
         order: i + 1,
-        targetSets: e.sets
+        targetSets: e.sets,
       }));
       const workoutId = await this.workoutService.createWorkout(day.name, exercises);
       this.router.navigate(['/workouts', workoutId, 'play']);
