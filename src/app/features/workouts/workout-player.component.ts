@@ -253,9 +253,19 @@ interface PlayerExercise {
         left: 0;
         right: 0;
         padding: 1rem;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
         background: var(--p-surface-card);
         border-top: 1px solid var(--p-surface-border);
         z-index: 50;
+      }
+      @media (max-width: 768px) {
+        .player-footer {
+          bottom: calc(64px + env(safe-area-inset-bottom));
+          padding-bottom: 0.75rem;
+        }
+        .workout-player {
+          padding-bottom: 10rem;
+        }
       }
       .empty-state {
         text-align: center;
