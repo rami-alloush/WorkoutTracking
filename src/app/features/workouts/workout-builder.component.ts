@@ -85,6 +85,15 @@ interface BuilderExercise {
               <div class="exercise-list">
                 @for (ex of builderExercises(); track ex.exerciseId; let i = $index) {
                   <div class="exercise-row">
+                    @if (getExerciseImage(ex.exerciseId); as imgUrl) {
+                      <img
+                        class="builder-thumb"
+                        [src]="imgUrl"
+                        [alt]="ex.exerciseName"
+                        loading="lazy"
+                        (error)="onImageError($event)"
+                      />
+                    }
                     <div class="exercise-order">
                       <p-button
                         icon="pi pi-chevron-up"
@@ -174,6 +183,14 @@ interface BuilderExercise {
         background: var(--p-surface-50);
         border-radius: var(--p-border-radius);
         border: 1px solid var(--p-surface-200);
+      }
+      .builder-thumb {
+        width: 56px;
+        height: 42px;
+        object-fit: contain;
+        background: var(--p-surface-0, #fff);
+        border-radius: var(--p-border-radius);
+        flex-shrink: 0;
       }
       .exercise-order {
         display: flex;
@@ -286,6 +303,15 @@ export class WorkoutBuilderComponent implements OnInit {
       },
     ]);
     this.selectedExerciseId = '';
+  }
+
+  getExerciseImage(exerciseId: string): string | undefined {
+    return this.exerciseService.getExerciseById(exerciseId)?.imageUrl;
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 
   removeExercise(index: number): void {

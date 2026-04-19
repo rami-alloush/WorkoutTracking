@@ -73,7 +73,16 @@ interface PlayerExercise {
             @for (exercise of playerExercises(); track exercise.exerciseId; let exIdx = $index) {
               <p-card styleClass="exercise-card">
                 <div class="exercise-card-header">
-                  <div>
+                  @if (getExerciseImage(exercise.exerciseId); as imgUrl) {
+                    <img
+                      class="exercise-thumb"
+                      [src]="imgUrl"
+                      [alt]="exercise.exerciseName"
+                      loading="lazy"
+                      (error)="onImageError($event)"
+                    />
+                  }
+                  <div class="exercise-title">
                     <h3>{{ exercise.exerciseName }}</h3>
                     <p-tag [value]="getMuscleName(exercise.exerciseId)" [rounded]="true" />
                   </div>
@@ -189,10 +198,23 @@ interface PlayerExercise {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        gap: 0.75rem;
         margin-bottom: 0.75rem;
         h3 {
           margin: 0 0 0.25rem;
         }
+      }
+      .exercise-thumb {
+        width: 80px;
+        height: 60px;
+        object-fit: contain;
+        background: var(--p-surface-ground, #f4f4f5);
+        border-radius: var(--p-border-radius);
+        flex-shrink: 0;
+      }
+      .exercise-title {
+        flex: 1;
+        min-width: 0;
       }
       .sets-table {
         width: 100%;
@@ -422,6 +444,15 @@ export class WorkoutPlayerComponent implements OnInit {
 
   getMuscleName(exerciseId: string): string {
     return this.exerciseService.getExerciseById(exerciseId)?.muscleGroup ?? '';
+  }
+
+  getExerciseImage(exerciseId: string): string | undefined {
+    return this.exerciseService.getExerciseById(exerciseId)?.imageUrl;
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 
   addSet(exerciseIdx: number): void {

@@ -151,19 +151,28 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
         <div class="exercise-grid">
           @for (exercise of filteredExercises(); track exercise.id) {
             <div class="exercise-card" [class.custom-card]="exercise.isCustom">
-              <div class="exercise-card-header">
-                <span class="muscle-icon">{{ getMuscleGroupIcon(exercise.muscleGroup) }}</span>
-                <div class="card-actions">
-                  @if (exercise.isCustom) {
-                    <button
-                      class="icon-btn delete-btn"
-                      (click)="confirmDelete(exercise)"
-                      title="Delete custom exercise"
-                    >
-                      <i class="pi pi-trash"></i>
-                    </button>
-                  }
-                </div>
+              <div class="exercise-image">
+                @if (exercise.imageUrl) {
+                  <img
+                    [src]="exercise.imageUrl"
+                    [alt]="exercise.name"
+                    loading="lazy"
+                    (error)="onImageError($event)"
+                  />
+                } @else {
+                  <span class="muscle-icon-fallback">{{
+                    getMuscleGroupIcon(exercise.muscleGroup)
+                  }}</span>
+                }
+                @if (exercise.isCustom) {
+                  <button
+                    class="icon-btn delete-btn overlay-btn"
+                    (click)="confirmDelete(exercise)"
+                    title="Delete custom exercise"
+                  >
+                    <i class="pi pi-trash"></i>
+                  </button>
+                }
               </div>
               <div class="exercise-card-body">
                 <strong class="exercise-name">{{ exercise.name }}</strong>
@@ -392,6 +401,38 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
         border-left: 3px solid var(--p-primary-color);
       }
 
+      .exercise-image {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background: var(--p-surface-ground, #f4f4f5);
+        border-radius: var(--p-border-radius);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .exercise-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      .muscle-icon-fallback {
+        font-size: 3rem;
+        line-height: 1;
+      }
+      .overlay-btn {
+        position: absolute;
+        top: 0.35rem;
+        right: 0.35rem;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(4px);
+      }
+      .overlay-btn:hover {
+        background: rgba(255, 255, 255, 1);
+      }
+
       .exercise-card-header {
         display: flex;
         justify-content: space-between;
@@ -535,6 +576,11 @@ export class ExerciseLibraryComponent implements OnInit {
 
   getMuscleGroupIcon(group: string): string {
     return MUSCLE_GROUP_ICONS[group] ?? '🏋️';
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 
   getMuscleGroupSeverity(group: string): MuscleGroupTagSeverity {

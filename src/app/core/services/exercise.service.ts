@@ -56,7 +56,12 @@ export class ExerciseService {
     this.exercisesSignal.set(all);
   }
 
-  async addCustomExercise(name: string, muscleGroup: string, equipment?: string): Promise<void> {
+  async addCustomExercise(
+    name: string,
+    muscleGroup: string,
+    equipment?: string,
+    imageUrl?: string
+  ): Promise<void> {
     const uid = this.authService.uid();
     if (!uid) return;
 
@@ -71,6 +76,9 @@ export class ExerciseService {
     };
     if (equipment) {
       data['equipment'] = equipment;
+    }
+    if (imageUrl) {
+      data['imageUrl'] = imageUrl;
     }
     await setDoc(docRef, data);
     await this.loadExercises();
@@ -98,6 +106,7 @@ export class ExerciseService {
       name: data['name'],
       muscleGroup: data['muscleGroup'],
       equipment: data['equipment'] ?? undefined,
+      imageUrl: data['imageUrl'] ?? undefined,
       isCustom: data['isCustom'] ?? false,
       createdAt: data['createdAt']?.toDate?.() ?? new Date(),
       userId: data['userId']
