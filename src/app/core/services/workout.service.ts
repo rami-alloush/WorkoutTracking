@@ -56,6 +56,25 @@ export class WorkoutService {
     await this.loadWorkouts();
   }
 
+  async addExerciseToWorkout(id: string, exerciseId: string, targetSets = 3): Promise<void> {
+    const workout = this.getWorkoutById(id);
+    if (!workout) throw new Error('Template not found');
+    if (workout.exercises.some((exercise) => exercise.exerciseId === exerciseId)) {
+      throw new Error('Exercise already exists in this template');
+    }
+
+    const nextExercises: WorkoutExercise[] = [
+      ...workout.exercises,
+      {
+        exerciseId,
+        order: workout.exercises.length + 1,
+        targetSets,
+      },
+    ];
+
+    await this.updateWorkout(id, workout.name, nextExercises);
+  }
+
   async deleteWorkout(id: string): Promise<void> {
     const ref = doc(this.db, 'workouts', id);
     await deleteDoc(ref);

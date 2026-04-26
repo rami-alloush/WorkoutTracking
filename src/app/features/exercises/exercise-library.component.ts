@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed, inject, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Select } from 'primeng/select';
@@ -9,7 +10,9 @@ import { FloatLabel } from 'primeng/floatlabel';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { ExerciseService } from '../../core/services/exercise.service';
+import { WorkoutService } from '../../core/services/workout.service';
 import { Exercise, MUSCLE_GROUPS, EQUIPMENT_TYPES } from '../../shared/models/exercise.model';
+import { Workout } from '../../shared/models/workout.model';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { ExerciseDetailDialogComponent } from '../../shared/components/exercise-detail-dialog/exercise-detail-dialog.component';
 
@@ -196,6 +199,15 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
                     <p-tag value="Custom" severity="info" [rounded]="true" icon="pi pi-user" />
                   }
                 </div>
+                <div class="exercise-actions">
+                  <p-button
+                    label="Add to Template"
+                    icon="pi pi-bookmark"
+                    size="small"
+                    [text]="true"
+                    (onClick)="openAddToTemplateDialog(exercise)"
+                  />
+                </div>
               </div>
             </div>
           } @empty {
@@ -218,6 +230,82 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
 
       <!-- Exercise Detail Dialog -->
       <app-exercise-detail-dialog [exercise]="detailExercise()" [(visible)]="showDetailDialog" />
+
+      <p-dialog
+        header="Add to Template"
+        [(visible)]="showAddToTemplateDialog"
+        [modal]="true"
+        [style]="{ width: '440px' }"
+        [draggable]="false"
+      >
+        <div class="dialog-form">
+          @if (templateActionMessage()) {
+            <p class="dialog-message">{{ templateActionMessage() }}</p>
+          }
+
+          @if (workouts().length === 0) {
+            <p class="dialog-message">
+              No templates yet. Create a new template and we’ll preload
+              <strong>{{ selectedTemplateExercise()?.name }}</strong>.
+            </p>
+          } @else {
+            <p-floatLabel variant="on">
+              <p-select
+                id="targetTemplate"
+                [options]="workoutOptions()"
+                [(ngModel)]="selectedWorkoutId"
+                optionLabel="name"
+                optionValue="id"
+                appendTo="body"
+                styleClass="w-full"
+              />
+              <label for="targetTemplate">Template</label>
+            </p-floatLabel>
+
+            <p-floatLabel variant="on">
+              <p-select
+                id="targetSets"
+                [options]="targetSetOptions"
+                [(ngModel)]="selectedTargetSets"
+                optionLabel="label"
+                optionValue="value"
+                appendTo="body"
+                styleClass="w-full"
+              />
+              <label for="targetSets">Target Sets</label>
+            </p-floatLabel>
+          }
+        </div>
+        <ng-template #footer>
+          <p-button
+            label="Cancel"
+            [text]="true"
+            severity="secondary"
+            (onClick)="closeAddToTemplateDialog()"
+          />
+          @if (workouts().length === 0) {
+            <p-button
+              label="Create New Template"
+              icon="pi pi-plus"
+              (onClick)="createTemplateFromSelectedExercise()"
+            />
+          } @else {
+            <p-button
+              label="New Template"
+              icon="pi pi-plus"
+              [text]="true"
+              (onClick)="createTemplateFromSelectedExercise()"
+            />
+            <p-button
+              label="Add to Template"
+              icon="pi pi-check"
+              (onClick)="addSelectedExerciseToTemplate()"
+              [loading]="addingToTemplate()"
+              [disabled]="!selectedWorkoutId"
+            />
+          }
+        </ng-template>
+      </p-dialog>
 
       <!-- Add Exercise Dialog -->
       <p-dialog
@@ -502,6 +590,10 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
         gap: 0.375rem;
         flex-wrap: wrap;
       }
+      .exercise-actions {
+        display: flex;
+        justify-content: flex-start;
+      }
 
       .empty-state-wrapper {
         grid-column: 1 / -1;
@@ -534,6 +626,11 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
         gap: 1.5rem;
         padding-top: 0.75rem;
       }
+      .dialog-message {
+        margin: 0;
+        color: var(--p-text-muted-color);
+        line-height: 1.5;
+      }
 
       @media (max-width: 640px) {
         .filter-bar {
@@ -551,8 +648,11 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
 })
 export class ExerciseLibraryComponent implements OnInit {
   private exerciseService = inject(ExerciseService);
+  private workoutService = inject(WorkoutService);
+  private router = inject(Router);
 
   exercises = this.exerciseService.exercises;
+  workouts = this.workoutService.workouts;
   filteredExercises = signal<Exercise[]>([]);
   searchTerm = '';
   selectedMuscleGroup = '';
@@ -561,11 +661,17 @@ export class ExerciseLibraryComponent implements OnInit {
   showDialog = signal(false);
   showDeleteDialog = signal(false);
   showDetailDialog = signal(false);
+  showAddToTemplateDialog = signal(false);
   detailExercise = signal<Exercise | null>(null);
   saving = signal(false);
   deleting = signal(false);
+  addingToTemplate = signal(false);
   loading = signal(true);
   exerciseToDelete = signal<Exercise | null>(null);
+  selectedTemplateExercise = signal<Exercise | null>(null);
+  templateActionMessage = signal('');
+  selectedWorkoutId = '';
+  selectedTargetSets = 3;
 
   newExerciseName = '';
   newExerciseMuscle = '';
@@ -576,11 +682,16 @@ export class ExerciseLibraryComponent implements OnInit {
 
   muscleGroupFilterOptions = MUSCLE_GROUPS.map((g) => ({ label: g, value: g }));
   equipmentFilterOptions = EQUIPMENT_TYPES.map((e) => ({ label: e, value: e }));
-
-  canSave = computed(() => !!this.newExerciseName.trim() && !!this.newExerciseMuscle);
-  activeFilters = computed(
-    () => !!this.selectedMuscleGroup || !!this.selectedEquipment || !!this.searchTerm,
+  workoutOptions = computed(() =>
+    this.workouts().map((workout: Workout) => ({
+      id: workout.id,
+      name: `${workout.name} (${workout.exercises.length} exercises)`,
+    })),
   );
+  targetSetOptions = Array.from({ length: 10 }, (_, index) => ({
+    label: `${index + 1} sets`,
+    value: index + 1,
+  }));
 
   constructor() {
     // React to exercise signal changes
@@ -592,7 +703,7 @@ export class ExerciseLibraryComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
-      await this.exerciseService.loadExercises();
+      await Promise.all([this.exerciseService.loadExercises(), this.workoutService.loadWorkouts()]);
       this.filterExercises();
     } finally {
       this.loading.set(false);
@@ -658,6 +769,14 @@ export class ExerciseLibraryComponent implements OnInit {
     this.filterExercises();
   }
 
+  canSave(): boolean {
+    return !!this.newExerciseName.trim() && !!this.newExerciseMuscle;
+  }
+
+  activeFilters(): boolean {
+    return !!this.selectedMuscleGroup || !!this.selectedEquipment || !!this.searchTerm;
+  }
+
   async addExercise(): Promise<void> {
     if (!this.newExerciseName.trim() || !this.newExerciseMuscle) return;
     this.saving.set(true);
@@ -682,6 +801,51 @@ export class ExerciseLibraryComponent implements OnInit {
   openDetail(exercise: Exercise): void {
     this.detailExercise.set(exercise);
     this.showDetailDialog.set(true);
+  }
+
+  openAddToTemplateDialog(exercise: Exercise): void {
+    this.selectedTemplateExercise.set(exercise);
+    this.selectedWorkoutId = '';
+    this.selectedTargetSets = 3;
+    this.templateActionMessage.set('');
+    this.showAddToTemplateDialog.set(true);
+  }
+
+  closeAddToTemplateDialog(): void {
+    this.showAddToTemplateDialog.set(false);
+    this.selectedWorkoutId = '';
+    this.selectedTargetSets = 3;
+    this.templateActionMessage.set('');
+  }
+
+  async addSelectedExerciseToTemplate(): Promise<void> {
+    const exercise = this.selectedTemplateExercise();
+    if (!exercise || !this.selectedWorkoutId) return;
+
+    this.addingToTemplate.set(true);
+    this.templateActionMessage.set('');
+    try {
+      await this.workoutService.addExerciseToWorkout(
+        this.selectedWorkoutId,
+        exercise.id,
+        this.selectedTargetSets,
+      );
+      this.closeAddToTemplateDialog();
+    } catch (err: any) {
+      this.templateActionMessage.set(err?.message ?? 'Failed to add exercise to template.');
+    } finally {
+      this.addingToTemplate.set(false);
+    }
+  }
+
+  createTemplateFromSelectedExercise(): void {
+    const exercise = this.selectedTemplateExercise();
+    if (!exercise) return;
+
+    this.closeAddToTemplateDialog();
+    this.router.navigate(['/workouts/new'], {
+      queryParams: { exerciseId: exercise.id },
+    });
   }
 
   confirmDelete(exercise: Exercise): void {

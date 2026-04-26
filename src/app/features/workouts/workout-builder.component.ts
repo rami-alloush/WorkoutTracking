@@ -11,7 +11,7 @@ import { Message } from 'primeng/message';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { WorkoutExercise } from '../../shared/models/workout.model';
-import { Exercise } from '../../shared/models/exercise.model';
+import { Exercise, EQUIPMENT_TYPES, MUSCLE_GROUPS } from '../../shared/models/exercise.model';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { ExerciseDetailDialogComponent } from '../../shared/components/exercise-detail-dialog/exercise-detail-dialog.component';
 
@@ -60,9 +60,36 @@ interface BuilderExercise {
           <div class="form-section">
             <h3>Exercises</h3>
 
+            <div class="exercise-filters">
+              <input
+                pInputText
+                [(ngModel)]="exerciseSearchTerm"
+                placeholder="Search exercises"
+                class="exercise-search"
+              />
+              <p-select
+                [options]="muscleGroupFilterOptions"
+                [(ngModel)]="selectedMuscleGroup"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="All muscle groups"
+                [showClear]="true"
+                styleClass="filter-select"
+              />
+              <p-select
+                [options]="equipmentFilterOptions"
+                [(ngModel)]="selectedEquipment"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="All equipment"
+                [showClear]="true"
+                styleClass="filter-select"
+              />
+            </div>
+
             <div class="add-exercise-row">
               <p-select
-                [options]="exerciseOptions()"
+                [options]="filteredExerciseOptions()"
                 [(ngModel)]="selectedExerciseId"
                 optionLabel="name"
                 optionValue="id"
@@ -78,6 +105,12 @@ interface BuilderExercise {
                 [disabled]="!selectedExerciseId"
               />
             </div>
+            <small class="exercise-filter-summary">
+              {{ filteredExerciseOptions().length }} exercise{{
+                filteredExerciseOptions().length === 1 ? '' : 's'
+              }}
+              available
+            </small>
 
             @if (builderExercises().length === 0) {
               <div class="empty-exercises">
@@ -181,6 +214,20 @@ interface BuilderExercise {
         margin-bottom: 1rem;
         align-items: center;
       }
+      .exercise-filters {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(180px, 1fr));
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      .exercise-search {
+        width: 100%;
+      }
+      .exercise-filter-summary {
+        display: block;
+        margin-bottom: 1rem;
+        color: var(--p-text-muted-color);
+      }
       .exercise-list {
         display: flex;
         flex-direction: column;
@@ -250,6 +297,9 @@ interface BuilderExercise {
           color: var(--p-text-muted-color);
         }
       }
+      :host ::ng-deep .sets-row .p-inputnumber {
+        max-width: 100%;
+      }
       .empty-exercises {
         text-align: center;
         padding: 2rem;
@@ -263,6 +313,55 @@ interface BuilderExercise {
         gap: 0.5rem;
         padding-top: 1rem;
         border-top: 1px solid var(--p-surface-border);
+      }
+      @media (max-width: 768px) {
+        .exercise-filters,
+        .add-exercise-row {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+        .exercise-row {
+          display: grid;
+          grid-template-columns: 56px 2.5rem minmax(0, 1fr) auto;
+          align-items: start;
+        }
+        .exercise-details strong {
+          white-space: normal;
+        }
+        .sets-row {
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr);
+          align-items: center;
+        }
+        :host ::ng-deep .sets-row .p-inputnumber,
+        :host ::ng-deep .sets-row .p-inputnumber-input {
+          width: 100%;
+        }
+      }
+      @media (max-width: 520px) {
+        .exercise-row {
+          grid-template-columns: 56px 1fr auto;
+          grid-template-areas:
+            'thumb details delete'
+            'order details delete';
+          row-gap: 0.5rem;
+        }
+        .builder-thumb-btn {
+          grid-area: thumb;
+        }
+        .exercise-order {
+          grid-area: order;
+          flex-direction: row;
+          justify-content: flex-start;
+          gap: 0.25rem;
+        }
+        .exercise-details {
+          grid-area: details;
+        }
+        .exercise-row > p-button {
+          grid-area: delete;
+          align-self: start;
+        }
       }
     `,
   ],
@@ -279,11 +378,43 @@ export class WorkoutBuilderComponent implements OnInit {
   selectedExerciseId = '';
   builderExercises = signal<BuilderExercise[]>([]);
   exerciseOptions = signal<Exercise[]>([]);
+  exerciseSearchTerm = '';
+  selectedMuscleGroup = '';
+  selectedEquipment = '';
   error = signal('');
   saving = signal(false);
   loading = signal(true);
   showDetailDialog = signal(false);
   detailExercise = signal<Exercise | null>(null);
+  muscleGroupFilterOptions = MUSCLE_GROUPS.map((group) => ({ label: group, value: group }));
+  equipmentFilterOptions = EQUIPMENT_TYPES.map((equipment) => ({
+    label: equipment,
+    value: equipment,
+  }));
+
+  filteredExerciseOptions(): Exercise[] {
+    const selectedIds = new Set(this.builderExercises().map((exercise) => exercise.exerciseId));
+    const term = this.exerciseSearchTerm.trim().toLowerCase();
+
+    return this.exerciseOptions().filter((exercise) => {
+      if (selectedIds.has(exercise.id)) return false;
+      if (
+        term &&
+        !exercise.name.toLowerCase().includes(term) &&
+        !exercise.muscleGroup.toLowerCase().includes(term) &&
+        !(exercise.equipment?.toLowerCase().includes(term) ?? false)
+      ) {
+        return false;
+      }
+      if (this.selectedMuscleGroup && exercise.muscleGroup !== this.selectedMuscleGroup) {
+        return false;
+      }
+      if (this.selectedEquipment && exercise.equipment !== this.selectedEquipment) {
+        return false;
+      }
+      return true;
+    });
+  }
 
   async ngOnInit(): Promise<void> {
     try {
@@ -298,6 +429,7 @@ export class WorkoutBuilderComponent implements OnInit {
     this.exerciseOptions.set(this.exerciseService.exercises());
 
     const id = this.route.snapshot.paramMap.get('id');
+    const preselectedExerciseId = this.route.snapshot.queryParamMap.get('exerciseId');
     if (id) {
       const workout = this.workoutService.getWorkoutById(id);
       if (workout) {
@@ -312,6 +444,11 @@ export class WorkoutBuilderComponent implements OnInit {
           })),
         );
       }
+    }
+
+    if (preselectedExerciseId) {
+      this.selectedExerciseId = preselectedExerciseId;
+      this.addExercise();
     }
   }
 
