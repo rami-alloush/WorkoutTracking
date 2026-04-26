@@ -11,6 +11,7 @@ import { InputIcon } from 'primeng/inputicon';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { Exercise, MUSCLE_GROUPS, EQUIPMENT_TYPES } from '../../shared/models/exercise.model';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { ExerciseDetailDialogComponent } from '../../shared/components/exercise-detail-dialog/exercise-detail-dialog.component';
 
 const MUSCLE_GROUP_ICONS: Record<string, string> = {
   Chest: '🏋️',
@@ -63,6 +64,7 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
     IconField,
     InputIcon,
     LoadingComponent,
+    ExerciseDetailDialogComponent,
   ],
   template: `
     <div class="exercise-library">
@@ -151,7 +153,12 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
         <div class="exercise-grid">
           @for (exercise of filteredExercises(); track exercise.id) {
             <div class="exercise-card" [class.custom-card]="exercise.isCustom">
-              <div class="exercise-image">
+              <button
+                type="button"
+                class="exercise-image image-btn"
+                (click)="openDetail(exercise)"
+                [attr.aria-label]="'View ' + exercise.name + ' details'"
+              >
                 @if (exercise.imageUrl) {
                   <img
                     [src]="exercise.imageUrl"
@@ -167,13 +174,13 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
                 @if (exercise.isCustom) {
                   <button
                     class="icon-btn delete-btn overlay-btn"
-                    (click)="confirmDelete(exercise)"
+                    (click)="confirmDelete(exercise); $event.stopPropagation()"
                     title="Delete custom exercise"
                   >
                     <i class="pi pi-trash"></i>
                   </button>
                 }
-              </div>
+              </button>
               <div class="exercise-card-body">
                 <strong class="exercise-name">{{ exercise.name }}</strong>
                 <div class="exercise-tags">
@@ -208,6 +215,9 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
           }
         </div>
       }
+
+      <!-- Exercise Detail Dialog -->
+      <app-exercise-detail-dialog [exercise]="detailExercise()" [(visible)]="showDetailDialog" />
 
       <!-- Add Exercise Dialog -->
       <p-dialog
@@ -412,6 +422,19 @@ const MUSCLE_GROUP_SEVERITY: Record<string, MuscleGroupTagSeverity> = {
         align-items: center;
         justify-content: center;
       }
+      .image-btn {
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+      }
+      .image-btn:hover img {
+        transform: scale(1.03);
+      }
+      .image-btn:focus-visible {
+        outline: 2px solid var(--p-primary-color);
+        outline-offset: 2px;
+      }
       .exercise-image img {
         width: 100%;
         height: 100%;
@@ -537,6 +560,8 @@ export class ExerciseLibraryComponent implements OnInit {
 
   showDialog = signal(false);
   showDeleteDialog = signal(false);
+  showDetailDialog = signal(false);
+  detailExercise = signal<Exercise | null>(null);
   saving = signal(false);
   deleting = signal(false);
   loading = signal(true);
@@ -652,6 +677,11 @@ export class ExerciseLibraryComponent implements OnInit {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  openDetail(exercise: Exercise): void {
+    this.detailExercise.set(exercise);
+    this.showDetailDialog.set(true);
   }
 
   confirmDelete(exercise: Exercise): void {

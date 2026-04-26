@@ -13,6 +13,7 @@ import { ExerciseService } from '../../core/services/exercise.service';
 import { WorkoutExercise } from '../../shared/models/workout.model';
 import { Exercise } from '../../shared/models/exercise.model';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { ExerciseDetailDialogComponent } from '../../shared/components/exercise-detail-dialog/exercise-detail-dialog.component';
 
 interface BuilderExercise {
   exerciseId: string;
@@ -33,6 +34,7 @@ interface BuilderExercise {
     FloatLabel,
     Message,
     LoadingComponent,
+    ExerciseDetailDialogComponent,
   ],
   template: `
     <div class="workout-builder">
@@ -86,13 +88,20 @@ interface BuilderExercise {
                 @for (ex of builderExercises(); track ex.exerciseId; let i = $index) {
                   <div class="exercise-row">
                     @if (getExerciseImage(ex.exerciseId); as imgUrl) {
-                      <img
-                        class="builder-thumb"
-                        [src]="imgUrl"
-                        [alt]="ex.exerciseName"
-                        loading="lazy"
-                        (error)="onImageError($event)"
-                      />
+                      <button
+                        type="button"
+                        class="builder-thumb-btn"
+                        (click)="openDetail(ex.exerciseId)"
+                        [attr.aria-label]="'View ' + ex.exerciseName + ' details'"
+                      >
+                        <img
+                          class="builder-thumb"
+                          [src]="imgUrl"
+                          [alt]="ex.exerciseName"
+                          loading="lazy"
+                          (error)="onImageError($event)"
+                        />
+                      </button>
                     }
                     <div class="exercise-order">
                       <p-button
@@ -148,6 +157,8 @@ interface BuilderExercise {
           </div>
         </p-card>
       }
+
+      <app-exercise-detail-dialog [exercise]="detailExercise()" [(visible)]="showDetailDialog" />
     </div>
   `,
   styles: [
@@ -184,13 +195,29 @@ interface BuilderExercise {
         border-radius: var(--p-border-radius);
         border: 1px solid var(--p-surface-200);
       }
+      .builder-thumb-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        flex-shrink: 0;
+        border-radius: var(--p-border-radius);
+      }
+      .builder-thumb-btn:focus-visible {
+        outline: 2px solid var(--p-primary-color);
+        outline-offset: 2px;
+      }
+      .builder-thumb-btn:hover .builder-thumb {
+        transform: scale(1.05);
+      }
       .builder-thumb {
         width: 56px;
         height: 42px;
         object-fit: contain;
         background: var(--p-surface-0, #fff);
         border-radius: var(--p-border-radius);
-        flex-shrink: 0;
+        display: block;
+        transition: transform 0.15s ease;
       }
       .exercise-order {
         display: flex;
@@ -255,6 +282,8 @@ export class WorkoutBuilderComponent implements OnInit {
   error = signal('');
   saving = signal(false);
   loading = signal(true);
+  showDetailDialog = signal(false);
+  detailExercise = signal<Exercise | null>(null);
 
   async ngOnInit(): Promise<void> {
     try {
@@ -307,6 +336,13 @@ export class WorkoutBuilderComponent implements OnInit {
 
   getExerciseImage(exerciseId: string): string | undefined {
     return this.exerciseService.getExerciseById(exerciseId)?.imageUrl;
+  }
+
+  openDetail(exerciseId: string): void {
+    const ex = this.exerciseService.getExerciseById(exerciseId);
+    if (!ex) return;
+    this.detailExercise.set(ex);
+    this.showDetailDialog.set(true);
   }
 
   onImageError(event: Event): void {

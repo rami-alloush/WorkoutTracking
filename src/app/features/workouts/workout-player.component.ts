@@ -13,7 +13,9 @@ import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
 import { Workout } from '../../shared/models/workout.model';
 import { ExerciseSet, SessionExercise } from '../../shared/models/session.model';
+import { Exercise } from '../../shared/models/exercise.model';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { ExerciseDetailDialogComponent } from '../../shared/components/exercise-detail-dialog/exercise-detail-dialog.component';
 
 interface PlayerExercise {
   exerciseId: string;
@@ -24,7 +26,17 @@ interface PlayerExercise {
 @Component({
   selector: 'app-workout-player',
   standalone: true,
-  imports: [FormsModule, Button, Card, InputNumber, Message, Tag, ConfirmDialog, LoadingComponent],
+  imports: [
+    FormsModule,
+    Button,
+    Card,
+    InputNumber,
+    Message,
+    Tag,
+    ConfirmDialog,
+    LoadingComponent,
+    ExerciseDetailDialogComponent,
+  ],
   providers: [ConfirmationService],
   template: `
     <div class="workout-player">
@@ -74,13 +86,20 @@ interface PlayerExercise {
               <p-card styleClass="exercise-card">
                 <div class="exercise-card-header">
                   @if (getExerciseImage(exercise.exerciseId); as imgUrl) {
-                    <img
-                      class="exercise-thumb"
-                      [src]="imgUrl"
-                      [alt]="exercise.exerciseName"
-                      loading="lazy"
-                      (error)="onImageError($event)"
-                    />
+                    <button
+                      type="button"
+                      class="exercise-thumb-btn"
+                      (click)="openDetail(exercise.exerciseId)"
+                      [attr.aria-label]="'View ' + exercise.exerciseName + ' details'"
+                    >
+                      <img
+                        class="exercise-thumb"
+                        [src]="imgUrl"
+                        [alt]="exercise.exerciseName"
+                        loading="lazy"
+                        (error)="onImageError($event)"
+                      />
+                    </button>
                   }
                   <div class="exercise-title">
                     <h3>{{ exercise.exerciseName }}</h3>
@@ -158,6 +177,7 @@ interface PlayerExercise {
         }
       }
       <p-confirmDialog />
+      <app-exercise-detail-dialog [exercise]="detailExercise()" [(visible)]="showDetailDialog" />
     </div>
   `,
   styles: [
@@ -204,10 +224,25 @@ interface PlayerExercise {
           margin: 0 0 0.25rem;
         }
       }
+      .exercise-thumb-btn {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        border-radius: var(--p-border-radius);
+      }
+      .exercise-thumb-btn:focus-visible {
+        outline: 2px solid var(--p-primary-color);
+        outline-offset: 2px;
+      }
+      .exercise-thumb-btn:hover .exercise-thumb {
+        transform: scale(1.05);
+      }
       .exercise-thumb {
         width: 80px;
         height: 60px;
         object-fit: contain;
+        transition: transform 0.15s ease;
         background: var(--p-surface-ground, #f4f4f5);
         border-radius: var(--p-border-radius);
         flex-shrink: 0;
@@ -328,6 +363,8 @@ export class WorkoutPlayerComponent implements OnInit {
   error = signal('');
   saving = signal(false);
   loading = signal(true);
+  showDetailDialog = signal(false);
+  detailExercise = signal<Exercise | null>(null);
   startTime = new Date();
   elapsedTime = signal('00:00');
   private timerInterval: ReturnType<typeof setInterval> | null = null;
@@ -448,6 +485,13 @@ export class WorkoutPlayerComponent implements OnInit {
 
   getExerciseImage(exerciseId: string): string | undefined {
     return this.exerciseService.getExerciseById(exerciseId)?.imageUrl;
+  }
+
+  openDetail(exerciseId: string): void {
+    const ex = this.exerciseService.getExerciseById(exerciseId);
+    if (!ex) return;
+    this.detailExercise.set(ex);
+    this.showDetailDialog.set(true);
   }
 
   onImageError(event: Event): void {
