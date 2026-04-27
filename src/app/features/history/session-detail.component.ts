@@ -201,10 +201,13 @@ export class SessionDetailComponent implements OnInit {
   totalSets = signal(0);
   totalVolumeKg = signal(0);
   loading = signal(true);
-  weightUnitLabel = this.weightUnitService.unitLabel;
 
   totalVolume(): string {
     return this.weightUnitService.formatVolume(this.totalVolumeKg());
+  }
+
+  weightUnitLabel(): string {
+    return this.weightUnitService.unitLabel();
   }
 
   async ngOnInit(): Promise<void> {

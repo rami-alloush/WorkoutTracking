@@ -231,7 +231,10 @@ export class LayoutComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   protected weightUnitService = inject(WeightUnitService);
-  protected weightUnit = this.weightUnitService.weightUnit;
+
+  protected weightUnit(): WeightUnit {
+    return this.weightUnitService.weightUnit();
+  }
 
   async setWeightUnit(unit: WeightUnit): Promise<void> {
     await this.weightUnitService.updateWeightUnit(unit);

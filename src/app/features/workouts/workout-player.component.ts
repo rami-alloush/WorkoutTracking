@@ -380,8 +380,6 @@ export class WorkoutPlayerComponent implements OnInit {
   private readonly STORAGE_KEY = 'workout-in-progress';
   private restoring = false;
   private displayWeightUnit: WeightUnit = this.weightUnitService.weightUnit();
-  weightUnitLabel = this.weightUnitService.unitLabel;
-  weightStep = this.weightUnitService.step;
 
   constructor() {
     effect(() => {
@@ -543,6 +541,14 @@ export class WorkoutPlayerComponent implements OnInit {
 
   getExerciseImage(exerciseId: string): string | undefined {
     return this.exerciseService.getExerciseById(exerciseId)?.imageUrl;
+  }
+
+  weightUnitLabel(): string {
+    return this.weightUnitService.unitLabel();
+  }
+
+  weightStep(): number {
+    return this.weightUnitService.step();
   }
 
   openDetail(exerciseId: string): void {
