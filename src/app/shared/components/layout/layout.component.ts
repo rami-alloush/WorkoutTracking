@@ -1,12 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 import { Button } from 'primeng/button';
+import { Select } from 'primeng/select';
+import { WeightUnitService } from '../../../core/services/weight-unit.service';
+import { WeightUnit } from '../../models/weight-unit.model';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Button],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, FormsModule, Button, Select],
   template: `
     <div class="layout-wrapper">
       <header class="layout-header">
@@ -38,13 +42,23 @@ import { Button } from 'primeng/button';
               <i class="pi pi-chart-line"></i><span>Progress</span>
             </a>
           </nav>
-          <p-button
-            icon="pi pi-sign-out"
-            [text]="true"
-            severity="secondary"
-            (onClick)="logout()"
-            pTooltip="Logout"
-          />
+          <div class="header-actions">
+            <p-select
+              [options]="weightUnitService.options"
+              [ngModel]="weightUnit()"
+              (ngModelChange)="setWeightUnit($event)"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="unit-select"
+            />
+            <p-button
+              icon="pi pi-sign-out"
+              [text]="true"
+              severity="secondary"
+              (onClick)="logout()"
+              pTooltip="Logout"
+            />
+          </div>
         </div>
       </header>
       <main class="layout-main">
@@ -98,6 +112,15 @@ import { Button } from 'primeng/button';
         display: flex;
         align-items: center;
         gap: 1.5rem;
+      }
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-left: auto;
+      }
+      :host ::ng-deep .unit-select {
+        min-width: 5.5rem;
       }
       .app-title {
         font-size: 1.25rem;
@@ -197,15 +220,22 @@ import { Button } from 'primeng/button';
           padding: 0.5rem 0.75rem;
           gap: 0.5rem;
         }
+        :host ::ng-deep .unit-select {
+          min-width: 4.75rem;
+        }
       }
     `,
   ],
 })
 export class LayoutComponent {
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-  ) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  protected weightUnitService = inject(WeightUnitService);
+  protected weightUnit = this.weightUnitService.weightUnit;
+
+  async setWeightUnit(unit: WeightUnit): Promise<void> {
+    await this.weightUnitService.updateWeightUnit(unit);
+  }
 
   async logout(): Promise<void> {
     await this.authService.logout();

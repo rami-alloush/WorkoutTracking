@@ -6,6 +6,7 @@ import { Tag } from 'primeng/tag';
 import { SessionService } from '../../core/services/session.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseService } from '../../core/services/exercise.service';
+import { WeightUnitService } from '../../core/services/weight-unit.service';
 import { WorkoutSession } from '../../shared/models/session.model';
 import { DatePipe } from '@angular/common';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
@@ -131,6 +132,7 @@ export class HistoryListComponent implements OnInit {
   private sessionService = inject(SessionService);
   private workoutService = inject(WorkoutService);
   private exerciseService = inject(ExerciseService);
+  private weightUnitService = inject(WeightUnitService);
   private router = inject(Router);
 
   sessions = this.sessionService.sessions;
@@ -139,6 +141,7 @@ export class HistoryListComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     try {
       await Promise.all([
+        this.weightUnitService.ensureLoaded(),
         this.exerciseService.loadExercises(),
         this.workoutService.loadWorkouts(),
         this.sessionService.loadSessions(),
@@ -168,7 +171,7 @@ export class HistoryListComponent implements OnInit {
       (sum, e) => sum + e.sets.reduce((s, set) => s + set.weight * set.reps, 0),
       0,
     );
-    return vol.toLocaleString() + ' lbs';
+    return this.weightUnitService.formatVolume(vol);
   }
 
   viewDetail(session: WorkoutSession): void {

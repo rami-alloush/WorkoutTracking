@@ -13,6 +13,8 @@ import {
 import { getFirebaseFirestore } from '../firebase.init';
 import { WorkoutSession, SessionExercise } from '../../shared/models/session.model';
 import { AuthService } from './auth.service';
+import { WeightUnitService } from './weight-unit.service';
+import { WeightUnit } from '../../shared/models/weight-unit.model';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -20,7 +22,10 @@ export class SessionService {
   private sessionsSignal = signal<WorkoutSession[]>([]);
   readonly sessions = this.sessionsSignal.asReadonly();
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private weightUnitService: WeightUnitService,
+  ) {}
 
   async loadSessions(): Promise<void> {
     const uid = this.authService.uid();
@@ -48,7 +53,8 @@ export class SessionService {
       userId: uid,
       startTime: Timestamp.fromDate(startTime),
       endTime: Timestamp.now(),
-      exercises
+      exercises,
+      weightUnit: 'kg',
     });
     await this.loadSessions();
     return docRef.id;
@@ -78,13 +84,27 @@ export class SessionService {
   }
 
   private fromFirestore(id: string, data: Record<string, any>): WorkoutSession {
+    const storedWeightUnit = data['weightUnit'] === 'kg' ? 'kg' : 'lb';
     return {
       id,
       workoutId: data['workoutId'],
       userId: data['userId'],
       startTime: data['startTime']?.toDate?.() ?? new Date(),
       endTime: data['endTime']?.toDate?.() ?? null,
-      exercises: data['exercises'] ?? []
+      exercises: this.normalizeExercises(data['exercises'] ?? [], storedWeightUnit),
     };
+  }
+
+  private normalizeExercises(
+    exercises: SessionExercise[],
+    storedWeightUnit: WeightUnit,
+  ): SessionExercise[] {
+    return exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map((set) => ({
+        ...set,
+        weight: this.weightUnitService.normalizeStoredWeight(set.weight, storedWeightUnit),
+      })),
+    }));
   }
 }

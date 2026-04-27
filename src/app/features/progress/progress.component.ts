@@ -1,11 +1,11 @@
-import { Component, OnInit, signal, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, signal, inject, ViewChild, ElementRef, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Card } from 'primeng/card';
 import { Select } from 'primeng/select';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
+import { WeightUnitService } from '../../core/services/weight-unit.service';
 import { Exercise } from '../../shared/models/exercise.model';
-import { WorkoutSession } from '../../shared/models/session.model';
 import { Chart, registerables } from 'chart.js';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 
@@ -27,18 +27,18 @@ Chart.register(...registerables);
         <div class="exercise-selector">
           <p-select
             [options]="exerciseOptions()"
-            [(ngModel)]="selectedExerciseId"
+            [ngModel]="selectedExerciseId()"
+            (ngModelChange)="onExerciseSelectionChange($event)"
             optionLabel="name"
             optionValue="id"
             placeholder="Select an exercise to view progress"
             styleClass="w-full"
             [filter]="true"
             filterBy="name"
-            (onChange)="onExerciseChange()"
           />
         </div>
 
-        @if (!selectedExerciseId) {
+        @if (!selectedExerciseId()) {
           <p-card styleClass="empty-card">
             <div class="empty-state">
               <i class="pi pi-chart-line"></i>
@@ -120,9 +120,10 @@ Chart.register(...registerables);
 export class ProgressComponent implements OnInit {
   private exerciseService = inject(ExerciseService);
   private sessionService = inject(SessionService);
+  private weightUnitService = inject(WeightUnitService);
 
   exerciseOptions = signal<Exercise[]>([]);
-  selectedExerciseId = '';
+  selectedExerciseId = signal('');
   noData = signal(false);
   loading = signal(true);
 
@@ -132,9 +133,18 @@ export class ProgressComponent implements OnInit {
   private weightChartInstance: Chart | null = null;
   private volumeChartInstance: Chart | null = null;
 
+  constructor() {
+    effect(() => {
+      const unit = this.weightUnitService.weightUnit();
+      const selectedExerciseId = this.selectedExerciseId();
+      if (!unit || !selectedExerciseId || this.loading()) return;
+      void this.onExerciseChange();
+    });
+  }
+
   async ngOnInit(): Promise<void> {
     try {
-      await this.exerciseService.loadExercises();
+      await Promise.all([this.weightUnitService.ensureLoaded(), this.exerciseService.loadExercises()]);
       this.exerciseOptions.set(this.exerciseService.exercises());
     } finally {
       this.loading.set(false);
@@ -142,9 +152,9 @@ export class ProgressComponent implements OnInit {
   }
 
   async onExerciseChange(): Promise<void> {
-    if (!this.selectedExerciseId) return;
+    if (!this.selectedExerciseId()) return;
 
-    const sessions = await this.sessionService.getSessionsForExercise(this.selectedExerciseId);
+    const sessions = await this.sessionService.getSessionsForExercise(this.selectedExerciseId());
 
     if (sessions.length === 0) {
       this.noData.set(true);
@@ -156,7 +166,7 @@ export class ProgressComponent implements OnInit {
     const dataPoints = sessions
       .map((session) => {
         const exerciseData = session.exercises.find(
-          (e) => e.exerciseId === this.selectedExerciseId,
+          (e) => e.exerciseId === this.selectedExerciseId(),
         );
         if (!exerciseData) return null;
 
@@ -176,13 +186,17 @@ export class ProgressComponent implements OnInit {
     const labels = dataPoints.map((d) =>
       d.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     );
-    const weights = dataPoints.map((d) => d.maxWeight);
-    const volumes = dataPoints.map((d) => d.volume);
+    const weights = dataPoints.map((d) => this.weightUnitService.toDisplayWeight(d.maxWeight));
+    const volumes = dataPoints.map((d) => this.weightUnitService.toDisplayWeight(d.volume, 0));
 
     setTimeout(() => {
       this.renderWeightChart(labels, weights);
       this.renderVolumeChart(labels, volumes);
     }, 100);
+  }
+
+  onExerciseSelectionChange(exerciseId: string): void {
+    this.selectedExerciseId.set(exerciseId);
   }
 
   private renderWeightChart(labels: string[], data: number[]): void {
@@ -195,7 +209,7 @@ export class ProgressComponent implements OnInit {
         labels,
         datasets: [
           {
-            label: 'Max Weight (lbs)',
+            label: `Max Weight (${this.weightUnitService.unitLabel()})`,
             data,
             borderColor: '#6366f1',
             backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -217,7 +231,7 @@ export class ProgressComponent implements OnInit {
           x: { grid: { display: false } },
           y: {
             beginAtZero: false,
-            title: { display: true, text: 'Weight (lbs)' },
+            title: { display: true, text: `Weight (${this.weightUnitService.unitLabel()})` },
           },
         },
       },
@@ -234,7 +248,7 @@ export class ProgressComponent implements OnInit {
         labels,
         datasets: [
           {
-            label: 'Volume (lbs)',
+            label: `Volume (${this.weightUnitService.unitLabel()})`,
             data,
             backgroundColor: 'rgba(34, 197, 94, 0.6)',
             borderColor: '#22c55e',
@@ -253,7 +267,7 @@ export class ProgressComponent implements OnInit {
           x: { grid: { display: false } },
           y: {
             beginAtZero: true,
-            title: { display: true, text: 'Volume (lbs)' },
+            title: { display: true, text: `Volume (${this.weightUnitService.unitLabel()})` },
           },
         },
       },

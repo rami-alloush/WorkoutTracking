@@ -6,6 +6,7 @@ import { Tag } from 'primeng/tag';
 import { SessionService } from '../../core/services/session.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseService } from '../../core/services/exercise.service';
+import { WeightUnitService } from '../../core/services/weight-unit.service';
 import { WorkoutSession } from '../../shared/models/session.model';
 import { DatePipe } from '@angular/common';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
@@ -56,7 +57,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
           <p-card styleClass="summary-card">
             <div class="summary-item">
               <div class="summary-value">{{ totalVolume() }}</div>
-              <div class="summary-label">Volume (lbs)</div>
+              <div class="summary-label">Volume ({{ weightUnitLabel() }})</div>
             </div>
           </p-card>
         </div>
@@ -78,9 +79,9 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
                 @for (set of exercise.sets; track $index; let i = $index) {
                   <div class="sets-detail-row">
                     <span class="col-set">{{ i + 1 }}</span>
-                    <span class="col-data">{{ set.weight }} lbs</span>
+                    <span class="col-data">{{ formatWeight(set.weight) }}</span>
                     <span class="col-data">{{ set.reps }}</span>
-                    <span class="col-data">{{ set.weight * set.reps }} lbs</span>
+                    <span class="col-data">{{ formatVolume(set.weight * set.reps) }}</span>
                   </div>
                 }
               </div>
@@ -192,17 +193,27 @@ export class SessionDetailComponent implements OnInit {
   private sessionService = inject(SessionService);
   private workoutService = inject(WorkoutService);
   private exerciseService = inject(ExerciseService);
+  private weightUnitService = inject(WeightUnitService);
 
   session = signal<WorkoutSession | null>(null);
   workoutName = signal('Workout');
   duration = signal('—');
   totalSets = signal(0);
-  totalVolume = signal('0');
+  totalVolumeKg = signal(0);
   loading = signal(true);
+  weightUnitLabel = this.weightUnitService.unitLabel;
+
+  totalVolume(): string {
+    return this.weightUnitService.formatVolume(this.totalVolumeKg());
+  }
 
   async ngOnInit(): Promise<void> {
     try {
-      await Promise.all([this.exerciseService.loadExercises(), this.workoutService.loadWorkouts()]);
+      await Promise.all([
+        this.weightUnitService.ensureLoaded(),
+        this.exerciseService.loadExercises(),
+        this.workoutService.loadWorkouts(),
+      ]);
 
       const id = this.route.snapshot.paramMap.get('id');
       if (!id) return;
@@ -227,10 +238,18 @@ export class SessionDetailComponent implements OnInit {
         (s, e) => s + e.sets.reduce((ss, set) => ss + set.weight * set.reps, 0),
         0,
       );
-      this.totalVolume.set(vol.toLocaleString());
+      this.totalVolumeKg.set(vol);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  formatWeight(value: number): string {
+    return this.weightUnitService.formatWeight(value);
+  }
+
+  formatVolume(value: number): string {
+    return this.weightUnitService.formatVolume(value);
   }
 
   getExerciseName(exerciseId: string): string {

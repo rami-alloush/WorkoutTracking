@@ -35,5 +35,11 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.userId == request.auth.uid;
     }
+
+    // User preferences - only owner can read/write their own settings
+    match /userPreferences/{userId} {
+      allow read, create, update: if request.auth != null
+        && request.auth.uid == userId;
+    }
   }
 }

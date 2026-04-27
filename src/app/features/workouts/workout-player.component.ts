@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, inject, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
@@ -11,16 +11,23 @@ import { ConfirmationService } from 'primeng/api';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ExerciseService } from '../../core/services/exercise.service';
 import { SessionService } from '../../core/services/session.service';
+import { WeightUnitService } from '../../core/services/weight-unit.service';
 import { Workout } from '../../shared/models/workout.model';
-import { ExerciseSet, SessionExercise } from '../../shared/models/session.model';
+import { SessionExercise } from '../../shared/models/session.model';
 import { Exercise } from '../../shared/models/exercise.model';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
 import { ExerciseDetailDialogComponent } from '../../shared/components/exercise-detail-dialog/exercise-detail-dialog.component';
+import { WeightUnit } from '../../shared/models/weight-unit.model';
+
+interface PlayerSet {
+  reps: number;
+  weight: number;
+}
 
 interface PlayerExercise {
   exerciseId: string;
   exerciseName: string;
-  sets: ExerciseSet[];
+  sets: PlayerSet[];
 }
 
 @Component({
@@ -117,7 +124,7 @@ interface PlayerExercise {
                 <div class="sets-table">
                   <div class="sets-header">
                     <span class="set-col-num">Set</span>
-                    <span class="set-col">Weight (lbs)</span>
+                    <span class="set-col">Weight ({{ weightUnitLabel() }})</span>
                     <span class="set-col">Reps</span>
                     <span class="set-col-action"></span>
                   </div>
@@ -130,6 +137,7 @@ interface PlayerExercise {
                           [min]="0"
                           [max]="9999"
                           [maxFractionDigits]="1"
+                          [step]="weightStep()"
                           placeholder="0"
                           inputStyleClass="set-input"
                           (onFocus)="onInputFocus($event)"
@@ -357,6 +365,7 @@ export class WorkoutPlayerComponent implements OnInit {
   private exerciseService = inject(ExerciseService);
   private sessionService = inject(SessionService);
   private confirmationService = inject(ConfirmationService);
+  private weightUnitService = inject(WeightUnitService);
 
   workout = signal<Workout | null>(null);
   playerExercises = signal<PlayerExercise[]>([]);
@@ -370,8 +379,33 @@ export class WorkoutPlayerComponent implements OnInit {
   private timerInterval: ReturnType<typeof setInterval> | null = null;
   private readonly STORAGE_KEY = 'workout-in-progress';
   private restoring = false;
+  private displayWeightUnit: WeightUnit = this.weightUnitService.weightUnit();
+  weightUnitLabel = this.weightUnitService.unitLabel;
+  weightStep = this.weightUnitService.step;
 
   constructor() {
+    effect(() => {
+      const unit = this.weightUnitService.weightUnit();
+      const exercises = this.playerExercises();
+      if (this.restoring || exercises.length === 0 || unit === this.displayWeightUnit) {
+        this.displayWeightUnit = unit;
+        return;
+      }
+
+      this.restoring = true;
+      this.playerExercises.set(
+        exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) => ({
+            ...set,
+            weight: this.weightUnitService.convertWeight(set.weight, this.displayWeightUnit, unit),
+          })),
+        })),
+      );
+      this.displayWeightUnit = unit;
+      this.restoring = false;
+    });
+
     effect(() => {
       const w = this.workout();
       const exercises = this.playerExercises();
@@ -383,6 +417,7 @@ export class WorkoutPlayerComponent implements OnInit {
             workoutId: w.id,
             startTime: this.startTime.toISOString(),
             exercises,
+            weightUnit: this.displayWeightUnit,
           }),
         );
       } catch {}
@@ -391,13 +426,13 @@ export class WorkoutPlayerComponent implements OnInit {
 
   private loadAutoSave(
     workoutId: string,
-  ): { startTime: string; exercises: PlayerExercise[] } | null {
+  ): { startTime: string; exercises: PlayerExercise[]; weightUnit?: WeightUnit } | null {
     try {
       const raw = localStorage.getItem(this.STORAGE_KEY);
       if (!raw) return null;
       const data = JSON.parse(raw);
       if (data?.workoutId !== workoutId) return null;
-      return { startTime: data.startTime, exercises: data.exercises };
+      return { startTime: data.startTime, exercises: data.exercises, weightUnit: data.weightUnit };
     } catch {
       return null;
     }
@@ -419,10 +454,12 @@ export class WorkoutPlayerComponent implements OnInit {
 
   private async initWorkout(): Promise<void> {
     await Promise.all([
+      this.weightUnitService.ensureLoaded(),
       this.exerciseService.loadExercises(),
       this.workoutService.loadWorkouts(),
       this.sessionService.loadSessions(),
     ]);
+    this.displayWeightUnit = this.weightUnitService.weightUnit();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
@@ -437,7 +474,22 @@ export class WorkoutPlayerComponent implements OnInit {
       const parsed = new Date(saved.startTime);
       this.startTime = isNaN(parsed.getTime()) ? new Date() : parsed;
       this.restoring = true;
-      this.playerExercises.set(saved.exercises);
+      this.playerExercises.set(
+        saved.exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets.map((set) => ({
+            ...set,
+            weight:
+              saved.weightUnit && saved.weightUnit !== this.displayWeightUnit
+                ? this.weightUnitService.convertWeight(
+                    set.weight,
+                    saved.weightUnit,
+                    this.displayWeightUnit,
+                  )
+                : set.weight,
+          })),
+        })),
+      );
       this.restoring = false;
       this.startTimer();
       return;
@@ -452,15 +504,21 @@ export class WorkoutPlayerComponent implements OnInit {
       .sort((a, b) => a.order - b.order)
       .map((we) => {
         const lastExData = lastSession?.exercises.find((e) => e.exerciseId === we.exerciseId);
-        const sets: ExerciseSet[] = [];
+        const sets: PlayerSet[] = [];
 
         if (lastExData && lastExData.sets.length > 0) {
           for (const s of lastExData.sets) {
-            sets.push({ weight: s.weight, reps: s.reps });
+            sets.push({
+              weight: this.weightUnitService.toDisplayWeight(s.weight),
+              reps: s.reps,
+            });
           }
           while (sets.length < we.targetSets) {
             const last = lastExData.sets[lastExData.sets.length - 1];
-            sets.push({ weight: last.weight, reps: last.reps });
+            sets.push({
+              weight: this.weightUnitService.toDisplayWeight(last.weight),
+              reps: last.reps,
+            });
           }
         } else {
           const defaultReps = we.targetReps ?? 0;
@@ -555,7 +613,12 @@ export class WorkoutPlayerComponent implements OnInit {
     try {
       const exercises: SessionExercise[] = this.playerExercises().map((e) => ({
         exerciseId: e.exerciseId,
-        sets: e.sets.filter((s) => s.weight > 0 || s.reps > 0),
+        sets: e.sets
+          .filter((s) => s.weight > 0 || s.reps > 0)
+          .map((set) => ({
+            ...set,
+            weight: this.weightUnitService.fromDisplayWeight(set.weight),
+          })),
       }));
 
       await this.sessionService.saveSession(w.id, this.startTime, exercises);
