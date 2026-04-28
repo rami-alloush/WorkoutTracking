@@ -1,10 +1,10 @@
 # WorkoutTracker
 
-A personal workout tracking web application built with Angular, Firebase, PrimeNG, and Chart.js. Mobile-ready with Capacitor.
+A personal workout tracking app built with Angular, Firebase, PrimeNG, and Chart.js. Android and iOS projects are scaffolded with Capacitor.
 
 ## Tech Stack
 
-- **Frontend:** Angular 21 (standalone components, Signals)
+- **Frontend:** Angular 20 (standalone components, Signals)
 - **UI:** PrimeNG + PrimeIcons
 - **Charts:** Chart.js
 - **Backend:** Firebase (Firestore + Auth)
@@ -52,7 +52,28 @@ ng serve
 
 Open `http://localhost:4200`
 
-### 4. Deploy to Firebase Hosting
+### 4. Build Native Mobile Apps
+
+Android and iOS projects already exist in `android/` and `ios/`.
+
+```bash
+npm run build:mobile
+```
+
+Useful follow-up commands:
+
+```bash
+npm run cap:android
+npm run cap:ios
+npm run cap:sync
+```
+
+Notes:
+
+- Email/password auth works on web and native.
+- Google sign-in currently works on the web app only. Native Google auth needs Firebase provider setup for Android and iOS before it should be enabled in the mobile UI.
+
+### 5. Deploy to Firebase Hosting
 
 ```bash
 ng build
@@ -94,10 +115,8 @@ src/app/
 
 ## Capacitor (Mobile)
 
-Capacitor is pre-configured. To add platforms:
+Capacitor is configured with:
 
-```bash
-npx cap add android
-npx cap add ios
-npx cap sync
-```
+- `appId`: `com.workouttracker.app`
+- `appName`: `WorkoutTracker`
+- `webDir`: `dist/workout-tracker/browser`

@@ -1,4 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -32,7 +33,15 @@ export class AuthService {
     await signInWithEmailAndPassword(this.auth, email, password);
   }
 
+  canUseGoogleAuthPopup(): boolean {
+    return !Capacitor.isNativePlatform();
+  }
+
   async loginWithGoogle(): Promise<void> {
+    if (!this.canUseGoogleAuthPopup()) {
+      throw new Error('Google sign-in is not configured for the native app yet.');
+    }
+
     const provider = new GoogleAuthProvider();
     await signInWithPopup(this.auth, provider);
   }

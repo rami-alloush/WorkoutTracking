@@ -43,11 +43,17 @@ import { FloatLabel } from 'primeng/floatlabel';
           <p-button label="Sign In" icon="pi pi-sign-in" type="submit"
                     [loading]="loading()" styleClass="w-full" />
 
-          <div class="divider"><span>or</span></div>
+          @if (googleAuthAvailable) {
+            <div class="divider"><span>or</span></div>
 
-          <p-button label="Sign in with Google" icon="pi pi-google"
-                    [outlined]="true" (onClick)="onGoogleLogin()"
-                    [loading]="loading()" styleClass="w-full" />
+            <p-button label="Sign in with Google" icon="pi pi-google"
+                      [outlined]="true" (onClick)="onGoogleLogin()"
+                      [loading]="loading()" styleClass="w-full" />
+          } @else {
+            <p-message severity="info"
+                       text="Google sign-in is available on the web app. Native app support needs Firebase provider setup first."
+                       styleClass="w-full" />
+          }
         </form>
 
         <div class="auth-footer">
@@ -117,8 +123,11 @@ export class LoginComponent {
   password = '';
   error = signal('');
   loading = signal(false);
+  readonly googleAuthAvailable: boolean;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) {
+    this.googleAuthAvailable = this.authService.canUseGoogleAuthPopup();
+  }
 
   async onLogin(): Promise<void> {
     if (!this.email || !this.password) {
