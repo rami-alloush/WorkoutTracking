@@ -5,10 +5,12 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  signInWithCredential,
   User,
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { getFirebaseAuth } from '../firebase.init';
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +18,7 @@ export class AuthService {
   private auth = getFirebaseAuth();
   private currentUser = signal<User | null>(null);
   private authReady = signal(false);
+  private googleInitialized = false;
 
   readonly user = this.currentUser.asReadonly();
   readonly isAuthenticated = computed(() => !!this.currentUser());
@@ -29,6 +32,16 @@ export class AuthService {
     });
   }
 
+  private async initializeGoogleAuth(): Promise<void> {
+    if (this.googleInitialized) return;
+    await SocialLogin.initialize({
+      google: {
+        webClientId: '501522876413-b5m3thh9dluhaavfdgi0jfidubm8l2mf.apps.googleusercontent.com',
+      },
+    });
+    this.googleInitialized = true;
+  }
+
   async login(email: string, password: string): Promise<void> {
     await signInWithEmailAndPassword(this.auth, email, password);
   }
@@ -38,12 +51,24 @@ export class AuthService {
   }
 
   async loginWithGoogle(): Promise<void> {
-    if (!this.canUseGoogleAuthPopup()) {
-      throw new Error('Google sign-in is not configured for the native app yet.');
+    if (Capacitor.isNativePlatform()) {
+      await this.initializeGoogleAuth();
+      const result = await SocialLogin.login({
+        provider: 'google',
+        options: {
+          scopes: ['email', 'profile'],
+        },
+      });
+      const googleResult = result.result;
+      if (googleResult.responseType !== 'online' || !googleResult.idToken) {
+        throw new Error('Google sign-in failed: no ID token received.');
+      }
+      const credential = GoogleAuthProvider.credential(googleResult.idToken);
+      await signInWithCredential(this.auth, credential);
+    } else {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(this.auth, provider);
     }
-
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(this.auth, provider);
   }
 
   async register(email: string, password: string): Promise<void> {
@@ -51,6 +76,9 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
+    if (Capacitor.isNativePlatform() && this.googleInitialized) {
+      await SocialLogin.logout({ provider: 'google' }).catch(() => {});
+    }
     await signOut(this.auth);
   }
 }

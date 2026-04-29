@@ -56,10 +56,6 @@ import { FloatLabel } from 'primeng/floatlabel';
             <p-button label="Sign up with Google" icon="pi pi-google"
                       [outlined]="true" (onClick)="onGoogleRegister()"
                       [loading]="loading()" styleClass="w-full" />
-          } @else {
-            <p-message severity="info"
-                       text="Google sign-up is available on the web app. Native app support needs Firebase provider setup first."
-                       styleClass="w-full" />
           }
         </form>
 
@@ -134,7 +130,7 @@ export class RegisterComponent {
   readonly googleAuthAvailable: boolean;
 
   constructor(private authService: AuthService, private router: Router) {
-    this.googleAuthAvailable = this.authService.canUseGoogleAuthPopup();
+    this.googleAuthAvailable = true;
   }
 
   async onRegister(): Promise<void> {
