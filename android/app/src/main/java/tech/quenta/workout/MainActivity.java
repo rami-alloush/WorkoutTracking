@@ -1,4 +1,4 @@
-package com.workouttracker.app;
+package tech.quenta.workout;
 
 import ee.forgr.capacitor.social.login.GoogleProvider;
 import ee.forgr.capacitor.social.login.SocialLoginPlugin;

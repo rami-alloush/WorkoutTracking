@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.workouttracker.app"
+    namespace = "tech.quenta.workout"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.workouttracker.app"
+        applicationId "tech.quenta.workout"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

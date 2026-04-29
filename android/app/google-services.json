@@ -41,6 +41,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501522876413:android:74431bef6b69783a877b94",
+        "android_client_info": {
+          "package_name": "tech.quenta.workout"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "501522876413-b5m3thh9dluhaavfdgi0jfidubm8l2mf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApDjZJsRr6XYo6SyYcnVA7l1MyZf0jD_k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501522876413-b5m3thh9dluhaavfdgi0jfidubm8l2mf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

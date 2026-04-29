@@ -117,6 +117,6 @@ src/app/
 
 Capacitor is configured with:
 
-- `appId`: `com.workouttracker.app`
+- `appId`: `tech.quenta.workout`
 - `appName`: `WorkoutTracker`
 - `webDir`: `dist/workout-tracker/browser`
