@@ -104,6 +104,7 @@ import { WeightUnit } from '../../models/weight-unit.model';
         position: sticky;
         top: 0;
         z-index: 1000;
+        padding-top: env(safe-area-inset-top);
       }
       .header-content {
         max-width: 1200px;
