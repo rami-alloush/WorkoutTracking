@@ -12,6 +12,7 @@ import {
 } from 'firebase/auth';
 import { SocialLogin } from '@capgo/capacitor-social-login';
 import { getFirebaseAuth } from '../firebase.init';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -34,9 +35,14 @@ export class AuthService {
 
   private async initializeGoogleAuth(): Promise<void> {
     if (this.googleInitialized) return;
+    const platform = Capacitor.getPlatform();
     await SocialLogin.initialize({
       google: {
-        webClientId: '501522876413-b5m3thh9dluhaavfdgi0jfidubm8l2mf.apps.googleusercontent.com',
+        webClientId: environment.googleAuth.webClientId,
+        ...(platform === 'ios' && {
+          iOSClientId: environment.googleAuth.iOSClientId,
+          iOSServerClientId: environment.googleAuth.webClientId,
+        }),
       },
     });
     this.googleInitialized = true;
