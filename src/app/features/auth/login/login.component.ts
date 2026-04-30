@@ -56,6 +56,10 @@ import { FloatLabel } from 'primeng/floatlabel';
           <span>Don't have an account?</span>
           <a routerLink="/register">Sign up</a>
         </div>
+
+        <div class="legal-link">
+          <a routerLink="/privacy-policy">Privacy Policy</a>
+        </div>
       </p-card>
     </div>
   `,
@@ -110,6 +114,17 @@ import { FloatLabel } from 'primeng/floatlabel';
         text-decoration: none;
         font-weight: 600;
         &:hover { text-decoration: underline; }
+      }
+    }
+    .legal-link {
+      margin-top: 0.875rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--p-text-muted-color);
+      a {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
       }
     }
   `]
