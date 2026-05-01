@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="55%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E6FFF5"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
+      <feOffset dx="0" dy="10" result="off"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.28"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="200" ry="200" fill="url(#bg)"/>
+
+  <!-- Soft highlight -->
+  <ellipse cx="320" cy="240" rx="420" ry="220" fill="#FFFFFF" opacity="0.12"/>
+
+  <!-- Dumbbell (horizontal), centered -->
+  <g filter="url(#shadow)" transform="translate(512 512) rotate(-18) translate(-512 -512)">
+    <!-- Bar -->
+    <rect x="260" y="485" width="504" height="54" rx="18" fill="url(#metal)"/>
+
+    <!-- Left inner collar -->
+    <rect x="228" y="452" width="56" height="120" rx="14" fill="url(#metal)"/>
+    <!-- Right inner collar -->
+    <rect x="740" y="452" width="56" height="120" rx="14" fill="url(#metal)"/>
+
+    <!-- Left weight -->
+    <rect x="150" y="378" width="86" height="268" rx="26" fill="url(#metal)"/>
+    <!-- Right weight -->
+    <rect x="788" y="378" width="86" height="268" rx="26" fill="url(#metal)"/>
+
+    <!-- Left outer cap -->
+    <rect x="108" y="412" width="52" height="200" rx="18" fill="url(#metal)"/>
+    <!-- Right outer cap -->
+    <rect x="864" y="412" width="52" height="200" rx="18" fill="url(#metal)"/>
+  </g>
+</svg>

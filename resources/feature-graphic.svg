@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Google Play feature graphic: 1024 x 500, no transparency. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 500">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="55%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#E6FFF5"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="500" fill="url(#bg)"/>
+  <ellipse cx="200" cy="80" rx="420" ry="180" fill="#FFFFFF" opacity="0.12"/>
+  <ellipse cx="1000" cy="520" rx="380" ry="200" fill="#FFFFFF" opacity="0.08"/>
+
+  <!-- Dumbbell on the left: center at (230, 250), scale 0.36, rotated -18° around its own center. -->
+  <g transform="translate(230 250) scale(0.36) rotate(-18) translate(-512 -512)">
+    <rect x="260" y="485" width="504" height="54" rx="18" fill="url(#metal)"/>
+    <rect x="228" y="452" width="56" height="120" rx="14" fill="url(#metal)"/>
+    <rect x="740" y="452" width="56" height="120" rx="14" fill="url(#metal)"/>
+    <rect x="150" y="378" width="86" height="268" rx="26" fill="url(#metal)"/>
+    <rect x="788" y="378" width="86" height="268" rx="26" fill="url(#metal)"/>
+    <rect x="108" y="412" width="52" height="200" rx="18" fill="url(#metal)"/>
+    <rect x="864" y="412" width="52" height="200" rx="18" fill="url(#metal)"/>
+  </g>
+
+  <!-- Wordmark on the right -->
+  <g font-family="-apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" fill="#FFFFFF">
+    <text x="470" y="220" font-size="62" font-weight="800" letter-spacing="0.5">WorkoutTracker</text>
+    <text x="472" y="270" font-size="22" font-weight="500" opacity="0.9" letter-spacing="4">TRAIN · TRACK · PROGRESS</text>
+    <g transform="translate(472 320)" font-size="20" font-weight="500" opacity="0.92">
+      <text y="0">• Workout templates &amp; live player</text>
+      <text y="32">• Exercise library with images</text>
+      <text y="64">• Progress charts &amp; history</text>
+    </g>
+  </g>
+</svg>

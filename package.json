@@ -10,6 +10,7 @@
     "cap:sync": "npx cap sync",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios",
+    "assets:generate": "node scripts/generate-icons.mjs && npx capacitor-assets generate --iconBackgroundColor \"#10B981\" --iconBackgroundColorDark \"#04110C\" --splashBackgroundColor \"#10B981\" --splashBackgroundColorDark \"#04110C\"",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -55,8 +56,11 @@
     "@angular/build": "^20.0.0",
     "@angular/cli": "^20.0.0",
     "@angular/compiler-cli": "^20.0.0",
+    "@capacitor/assets": "^3.0.5",
     "firebase-tools": "^14.27.0",
     "jsdom": "^27.1.0",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5",
     "typescript": "~5.9.2",
     "vitest": "^3.1.1"
   }
