@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  appVersion: '1.0.1',
   firebase: {
   apiKey: "AIzaSyD6unP0gEs88LTzD6MC-bHEvp-fVSMBvJs",
   authDomain: "workouttrackingcore.firebaseapp.com",

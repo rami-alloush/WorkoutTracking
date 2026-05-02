@@ -6,6 +6,7 @@ import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { WeightUnitService } from '../../../core/services/weight-unit.service';
 import { WeightUnit } from '../../models/weight-unit.model';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-layout',
@@ -18,6 +19,7 @@ import { WeightUnit } from '../../models/weight-unit.model';
           <h1 class="app-title" routerLink="/dashboard">
             <img src="icon-192.png" alt="Workout Tracker" class="app-icon" />
             Workout Tracker
+            <span class="app-version">v{{ appVersion }}</span>
           </h1>
           <nav class="nav-links nav-desktop">
             <a
@@ -135,6 +137,18 @@ import { WeightUnit } from '../../models/weight-unit.model';
         margin: 0;
         white-space: nowrap;
       }
+      .app-version {
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: var(--p-primary-contrast-color);
+        background: var(--p-primary-color);
+        border-radius: 999px;
+        padding: 0.1em 0.55em;
+        opacity: 0.85;
+        align-self: center;
+        flex-shrink: 0;
+      }
       .app-icon {
         width: 1.75rem;
         height: 1.75rem;
@@ -244,6 +258,7 @@ export class LayoutComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   protected weightUnitService = inject(WeightUnitService);
+  protected appVersion = environment.appVersion;
 
   protected weightUnit(): WeightUnit {
     return this.weightUnitService.weightUnit();
