@@ -10,7 +10,7 @@
     "cap:sync": "npx cap sync",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios",
-    "assets:generate": "node scripts/generate-icons.mjs && npx capacitor-assets generate --iconBackgroundColor \"#10B981\" --iconBackgroundColorDark \"#04110C\" --splashBackgroundColor \"#10B981\" --splashBackgroundColorDark \"#04110C\"",
+    "assets:generate": "node scripts/generate-icons.mjs && npx capacitor-assets generate --iconBackgroundColor \"#10B981\" --iconBackgroundColorDark \"#04110C\" --splashBackgroundColor \"#10B981\" --splashBackgroundColorDark \"#04110C\" && node scripts/patch-adaptive-icons.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

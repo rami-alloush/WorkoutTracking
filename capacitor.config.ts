@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'tech.quenta.workout',
-  appName: 'WorkoutTracker',
+  appName: 'Workout Tracker',
   webDir: 'dist/workout-tracker/browser',
   plugins: {
     SocialLogin: {

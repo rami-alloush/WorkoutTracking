@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">WorkoutTracker</string>
-    <string name="title_activity_main">WorkoutTracker</string>
+    <string name="app_name">Workout Tracker</string>
+    <string name="title_activity_main">Workout Tracker</string>
     <string name="package_name">tech.quenta.workout</string>
     <string name="custom_url_scheme">tech.quenta.workout</string>
 </resources>

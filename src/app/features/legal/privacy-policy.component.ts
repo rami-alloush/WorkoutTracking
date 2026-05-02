@@ -13,7 +13,7 @@ import { RouterLink } from '@angular/router';
         <p class="eyebrow">Legal</p>
         <h1>Privacy Policy</h1>
         <p class="intro">
-          This Privacy Policy explains how WorkoutTracker collects, uses, and protects your
+          This Privacy Policy explains how Workout Tracker collects, uses, and protects your
           information when you use the app.
         </p>
         <p class="updated">Last updated: April 29, 2026</p>
@@ -22,7 +22,7 @@ import { RouterLink } from '@angular/router';
       <p-card styleClass="policy-card">
         <section>
           <h2>Information We Collect</h2>
-          <p>WorkoutTracker collects information you provide directly when you use the app, including:</p>
+          <p>Workout Tracker collects information you provide directly when you use the app, including:</p>
           <ul>
             <li>Your account information, such as your email address and sign-in method.</li>
             <li>Your workout content, including exercises, workout templates, programs, and session history.</li>
@@ -93,7 +93,7 @@ import { RouterLink } from '@angular/router';
         <section>
           <h2>Children's Privacy</h2>
           <p>
-            WorkoutTracker is not intended for children under 13, and we do not knowingly collect
+            Workout Tracker is not intended for children under 13, and we do not knowingly collect
             personal information from children under 13.
           </p>
         </section>
@@ -110,7 +110,7 @@ import { RouterLink } from '@angular/router';
           <h2>Contact</h2>
           <p>
             If you have questions about this Privacy Policy, please contact the support channel or
-            store listing associated with your copy of WorkoutTracker.
+            store listing associated with your copy of Workout Tracker.
           </p>
         </section>
 

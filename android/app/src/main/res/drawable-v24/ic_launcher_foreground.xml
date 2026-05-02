@@ -1,34 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive-icon foreground: dumbbell in solid white.
+  108dp canvas; artwork stays inside the 72dp safe zone (18dp inset each side).
+  The dumbbell is drawn at ~18-degree tilt to match the icon design.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportHeight="108"
-    android:viewportWidth="108">
-    <path
-        android:fillType="evenOdd"
-        android:pathData="M32,64C32,64 38.39,52.99 44.13,50.95C51.37,48.37 70.14,49.57 70.14,49.57L108.26,87.69L108,109.01L75.97,107.97L32,64Z"
-        android:strokeColor="#00000000"
-        android:strokeWidth="1">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:endX="78.5885"
-                android:endY="90.9159"
-                android:startX="48.7653"
-                android:startY="61.0927"
-                android:type="linear">
-                <item
-                    android:color="#44000000"
-                    android:offset="0.0" />
-                <item
-                    android:color="#00000000"
-                    android:offset="1.0" />
-            </gradient>
-        </aapt:attr>
-    </path>
-    <path
-        android:fillColor="#FFFFFF"
-        android:fillType="nonZero"
-        android:pathData="M66.94,46.02L66.94,46.02C72.44,50.07 76,56.61 76,64L32,64C32,56.61 35.56,50.11 40.98,46.06L36.18,41.19C35.45,40.45 35.45,39.3 36.18,38.56C36.91,37.81 38.05,37.81 38.78,38.56L44.25,44.05C47.18,42.57 50.48,41.71 54,41.71C57.48,41.71 60.78,42.57 63.68,44.05L69.11,38.56C69.84,37.81 70.98,37.81 71.71,38.56C72.44,39.3 72.44,40.45 71.71,41.19L66.94,46.02ZM62.94,56.92C64.08,56.92 65,56.01 65,54.88C65,53.76 64.08,52.85 62.94,52.85C61.8,52.85 60.88,53.76 60.88,54.88C60.88,56.01 61.8,56.92 62.94,56.92ZM45.06,56.92C46.2,56.92 47.13,56.01 47.13,54.88C47.13,53.76 46.2,52.85 45.06,52.85C43.92,52.85 43,53.76 43,54.88C43,56.01 43.92,56.92 45.06,56.92Z"
-        android:strokeColor="#00000000"
-        android:strokeWidth="1" />
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+      All coordinates are for a 108×108 viewport.
+      Safe zone: 18dp inset → artwork between x=18..90, y=18..90.
+      Dumbbell tilted ~-18° around center (54,54).
+
+      Pieces (in un-rotated space, then rotated -18° around 54,54):
+        Bar:        x=27..81  y=51.7..56.3  (length 54, height 4.6)
+        L-collar:   x=23..29  y=48..60      (width 6,  height 12)
+        R-collar:   x=79..85  y=48..60
+        L-plate:    x=16..23  y=42..66      (width 7,  height 24)
+        R-plate:    x=85..92  y=42..66
+        L-endcap:   x=12..16  y=45..63      (width 4,  height 18)
+        R-endcap:   x=92..96  y=45..63
+
+      Encoded as a single compound path using rotate() transform.
+    -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="-18">
+
+        <!-- Bar -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M28,51.7 L80,51.7 Q81,51.7 81,52.7 L81,55.3 Q81,56.3 80,56.3 L28,56.3 Q27,56.3 27,55.3 L27,52.7 Q27,51.7 28,51.7 Z" />
+
+        <!-- Left inner collar -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M23,48 L29,48 Q30,48 30,49 L30,59 Q30,60 29,60 L23,60 Q22,60 22,59 L22,49 Q22,48 23,48 Z" />
+
+        <!-- Right inner collar -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M78,48 L84,48 Q85,48 85,49 L85,59 Q85,60 84,60 L78,60 Q77,60 77,59 L77,49 Q77,48 78,48 Z" />
+
+        <!-- Left outer plate -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M16,42 L23,42 Q24,42 24,43 L24,65 Q24,66 23,66 L16,66 Q15,66 15,65 L15,43 Q15,42 16,42 Z" />
+
+        <!-- Right outer plate -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M85,42 L92,42 Q93,42 93,43 L93,65 Q93,66 92,66 L85,66 Q84,66 84,65 L84,43 Q84,42 85,42 Z" />
+
+        <!-- Left end cap -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,45 L16,45 Q17,45 17,46 L17,62 Q17,63 16,63 L12,63 Q11,63 11,62 L11,46 Q11,45 12,45 Z" />
+
+        <!-- Right end cap -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M92,45 L96,45 Q97,45 97,46 L97,62 Q97,63 96,63 L92,63 Q91,63 91,62 L91,46 Q91,45 92,45 Z" />
+
+    </group>
+
 </vector>

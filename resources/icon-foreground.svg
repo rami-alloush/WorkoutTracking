@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Android adaptive-icon foreground: transparent background, safe-zone compliant (keep art within center 66%). -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <defs>
-    <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="100%" stop-color="#E6FFF5"/>
-    </linearGradient>
-  </defs>
   <!-- Scaled to ~55% to stay inside the adaptive-icon safe zone -->
   <g transform="translate(512 512) rotate(-18) scale(0.55) translate(-512 -512)">
-    <rect x="260" y="485" width="504" height="54" rx="18" fill="url(#metal)"/>
-    <rect x="228" y="452" width="56" height="120" rx="14" fill="url(#metal)"/>
-    <rect x="740" y="452" width="56" height="120" rx="14" fill="url(#metal)"/>
-    <rect x="150" y="378" width="86" height="268" rx="26" fill="url(#metal)"/>
-    <rect x="788" y="378" width="86" height="268" rx="26" fill="url(#metal)"/>
-    <rect x="108" y="412" width="52" height="200" rx="18" fill="url(#metal)"/>
-    <rect x="864" y="412" width="52" height="200" rx="18" fill="url(#metal)"/>
+    <!-- Bar -->
+    <rect x="260" y="485" width="504" height="54" rx="18" fill="#FFFFFF"/>
+    <!-- Inner collars -->
+    <rect x="228" y="452" width="56" height="120" rx="14" fill="#FFFFFF"/>
+    <rect x="740" y="452" width="56" height="120" rx="14" fill="#FFFFFF"/>
+    <!-- Outer plates -->
+    <rect x="150" y="378" width="86" height="268" rx="26" fill="#FFFFFF"/>
+    <rect x="788" y="378" width="86" height="268" rx="26" fill="#FFFFFF"/>
+    <!-- Outer-most end caps -->
+    <rect x="108" y="412" width="52" height="200" rx="18" fill="#FFFFFF"/>
+    <rect x="864" y="412" width="52" height="200" rx="18" fill="#FFFFFF"/>
   </g>
 </svg>

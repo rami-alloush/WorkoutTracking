@@ -16,7 +16,8 @@ import { WeightUnit } from '../../models/weight-unit.model';
       <header class="layout-header">
         <div class="header-content">
           <h1 class="app-title" routerLink="/dashboard">
-            <i class="pi pi-bolt"></i> WorkoutTracker
+            <img src="icon-192.png" alt="Workout Tracker" class="app-icon" />
+            Workout Tracker
           </h1>
           <nav class="nav-links nav-desktop">
             <a
@@ -124,15 +125,22 @@ import { WeightUnit } from '../../models/weight-unit.model';
         min-width: 5.5rem;
       }
       .app-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--p-primary-color);
         cursor: pointer;
         margin: 0;
         white-space: nowrap;
-        i {
-          margin-right: 0.25rem;
-        }
+      }
+      .app-icon {
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 0.375rem;
+        object-fit: contain;
+        flex-shrink: 0;
       }
       .nav-links {
         display: flex;
@@ -216,6 +224,10 @@ import { WeightUnit } from '../../models/weight-unit.model';
         }
         .app-title {
           font-size: 1.1rem;
+        }
+        .app-icon {
+          width: 1.5rem;
+          height: 1.5rem;
         }
         .header-content {
           padding: 0.5rem 0.75rem;

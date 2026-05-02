@@ -17,7 +17,7 @@ import { FloatLabel } from 'primeng/floatlabel';
     <div class="auth-container">
       <p-card>
         <div class="auth-header">
-          <i class="pi pi-bolt auth-icon"></i>
+          <img src="icon-192.png" alt="Workout Tracker" class="auth-icon" />
           <h2>Create Account</h2>
           <p>Start tracking your workouts</p>
         </div>
@@ -90,8 +90,12 @@ import { FloatLabel } from 'primeng/floatlabel';
       p { color: var(--p-text-muted-color); margin: 0; }
     }
     .auth-icon {
-      font-size: 2.5rem;
-      color: var(--p-primary-color);
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 1rem;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
     }
     .auth-form {
       display: flex;
