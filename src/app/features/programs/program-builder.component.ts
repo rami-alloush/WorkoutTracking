@@ -19,6 +19,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
 interface BuilderDay {
   name: string;
   exercises: BuilderExercise[];
+  workoutId?: string;
 }
 
 interface BuilderExercise {
@@ -432,6 +433,7 @@ export class ProgramBuilderComponent implements OnInit {
         this.days.set(
           program.days.map((d) => ({
             name: d.name,
+            workoutId: d.workoutId,
             exercises: d.exercises.map((e) => ({
               exerciseId: e.exerciseId,
               exerciseName: this.exerciseService.getExerciseById(e.exerciseId)?.name ?? 'Unknown',
@@ -533,19 +535,23 @@ export class ProgramBuilderComponent implements OnInit {
     this.saving.set(true);
     this.error.set('');
     try {
-      const days: ProgramDay[] = this.days().map((d) => ({
-        name: d.name,
-        exercises: d.exercises.map((e) => {
-          const pe: ProgramExercise = {
-            exerciseId: e.exerciseId,
-            sets: e.sets,
-            repsMin: e.repsMin,
-            repsMax: e.repsMax,
-          };
-          if (e.notes) pe.notes = e.notes;
-          return pe;
-        }),
-      }));
+      const days: ProgramDay[] = this.days().map((d) => {
+        const pd: ProgramDay = {
+          name: d.name,
+          exercises: d.exercises.map((e) => {
+            const pe: ProgramExercise = {
+              exerciseId: e.exerciseId,
+              sets: e.sets,
+              repsMin: e.repsMin,
+              repsMax: e.repsMax,
+            };
+            if (e.notes) pe.notes = e.notes;
+            return pe;
+          }),
+        };
+        if (d.workoutId) pd.workoutId = d.workoutId;
+        return pd;
+      });
 
       const options = {
         description: this.programDesc.trim(),

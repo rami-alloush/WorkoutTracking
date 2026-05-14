@@ -114,7 +114,7 @@ import { LoadingComponent } from '../../shared/components/loading/loading.compon
                   <p-button
                     label="Start This Day"
                     icon="pi pi-play"
-                    (onClick)="startDay(day)"
+                    (onClick)="startDay(day, di)"
                     [loading]="starting()"
                   />
                 </div>
@@ -268,7 +268,11 @@ export class ProgramDetailComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
-      await Promise.all([this.exerciseService.loadExercises(), this.programService.loadPrograms()]);
+      await Promise.all([
+        this.exerciseService.loadExercises(),
+        this.programService.loadPrograms(),
+        this.workoutService.loadWorkouts(),
+      ]);
 
       const id = this.route.snapshot.paramMap.get('id');
       if (id) {
@@ -294,7 +298,10 @@ export class ProgramDetailComponent implements OnInit {
     return min === max ? `${min}` : `${min}–${max}`;
   }
 
-  async startDay(day: ProgramDay): Promise<void> {
+  async startDay(day: ProgramDay, dayIndex: number): Promise<void> {
+    const program = this.program();
+    if (!program) return;
+
     this.starting.set(true);
     try {
       const exercises: WorkoutExercise[] = day.exercises.map((e, i) => ({
@@ -303,7 +310,30 @@ export class ProgramDetailComponent implements OnInit {
         targetSets: e.sets,
         targetReps: e.repsMin,
       }));
-      const workoutId = await this.workoutService.createWorkout(day.name, exercises);
+
+      const cached = day.workoutId
+        ? this.workoutService.getWorkoutById(day.workoutId)
+        : undefined;
+
+      let workoutId: string;
+      if (cached) {
+        await this.workoutService.updateWorkout(cached.id, day.name, exercises);
+        workoutId = cached.id;
+      } else {
+        workoutId = await this.workoutService.createWorkout(day.name, exercises);
+        const updatedDays = program.days.map((d, i) =>
+          i === dayIndex ? { ...d, workoutId } : d,
+        );
+        await this.programService.updateProgram(program.id, program.name, updatedDays, {
+          description: program.description,
+          daysPerWeek: program.daysPerWeek,
+          goal: program.goal,
+          sessionLength: program.sessionLength,
+          progression: program.progression,
+        });
+        this.program.set(this.programService.getProgramById(program.id) ?? null);
+      }
+
       this.router.navigate(['/workouts', workoutId, 'play']);
     } catch (err) {
       console.error('Failed to start day:', err);

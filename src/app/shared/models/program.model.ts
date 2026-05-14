@@ -9,6 +9,7 @@ export interface ProgramExercise {
 export interface ProgramDay {
   name: string;
   exercises: ProgramExercise[];
+  workoutId?: string;
 }
 
 export interface Program {
